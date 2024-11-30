@@ -1,4 +1,4 @@
- /*                                                                      
+/*                                                                      
  Copyright 2019 Blue Liang, liangkangnan@163.com
                                                                          
  Licensed under the Apache License, Version 2.0 (the "License");         
@@ -19,40 +19,40 @@
 // 除法模块
 // 试商法实现32位整数除法
 // 每次除法运算至少需要33个时钟周期才能完成
-module div(
+module div (
 
     input wire clk,
     input wire rst,
 
     // from ex
-    input wire[`RegBus] dividend_i,      // 被除数
-    input wire[`RegBus] divisor_i,       // 除数
-    input wire start_i,                  // 开始信号，运算期间这个信号需要一直保持有效
-    input wire[2:0] op_i,                // 具体是哪一条指令
-    input wire[`RegAddrBus] reg_waddr_i, // 运算结束后需要写的寄存器
+    input wire [`RegBus] dividend_i,  // 被除数
+    input wire [`RegBus] divisor_i,  // 除数
+    input wire start_i,  // 开始信号，运算期间这个信号需要一直保持有效
+    input wire [2:0] op_i,  // 具体是哪一条指令
+    input wire [`RegAddrBus] reg_waddr_i,  // 运算结束后需要写的寄存器
 
     // to ex
-    output reg[`RegBus] result_o,        // 除法结果，高32位是余数，低32位是商
-    output reg ready_o,                  // 运算结束信号
-    output reg busy_o,                  // 正在运算信号
-    output reg[`RegAddrBus] reg_waddr_o  // 运算结束后需要写的寄存器
+    output reg [    `RegBus] result_o,    // 除法结果，高32位是余数，低32位是商
+    output reg               ready_o,     // 运算结束信号
+    output reg               busy_o,      // 正在运算信号
+    output reg [`RegAddrBus] reg_waddr_o  // 运算结束后需要写的寄存器
 
-    );
+);
 
     // 状态定义
-    localparam STATE_IDLE  = 4'b0001;
+    localparam STATE_IDLE = 4'b0001;
     localparam STATE_START = 4'b0010;
-    localparam STATE_CALC  = 4'b0100;
-    localparam STATE_END   = 4'b1000;
+    localparam STATE_CALC = 4'b0100;
+    localparam STATE_END = 4'b1000;
 
-    reg[`RegBus] dividend_r;
-    reg[`RegBus] divisor_r;
-    reg[2:0] op_r;
-    reg[3:0] state;
-    reg[31:0] count;
-    reg[`RegBus] div_result;
-    reg[`RegBus] div_remain;
-    reg[`RegBus] minuend;
+    reg [`RegBus] dividend_r;
+    reg [`RegBus] divisor_r;
+    reg [2:0] op_r;
+    reg [3:0] state;
+    reg [31:0] count;
+    reg [`RegBus] div_result;
+    reg [`RegBus] div_remain;
+    reg [`RegBus] minuend;
     reg invert_result;
 
     wire op_div = (op_r == `INST_DIV);
@@ -60,15 +60,15 @@ module div(
     wire op_rem = (op_r == `INST_REM);
     wire op_remu = (op_r == `INST_REMU);
 
-    wire[31:0] dividend_invert = (-dividend_r);
-    wire[31:0] divisor_invert = (-divisor_r);
-    wire minuend_ge_divisor = minuend >= divisor_r;
-    wire[31:0] minuend_sub_res = minuend - divisor_r;
+    wire [31:0] dividend_invert = (-dividend_r);
+    wire [31:0] divisor_invert = (-divisor_r);
+    wire minuend_ge_divisor = (minuend >= divisor_r);
+    wire [31:0] minuend_sub_res = minuend - divisor_r;
     wire[31:0] div_result_tmp = minuend_ge_divisor? ({div_result[30:0], 1'b1}): ({div_result[30:0], 1'b0});
-    wire[31:0] minuend_tmp = minuend_ge_divisor? minuend_sub_res[30:0]: minuend[30:0];
+    wire [31:0] minuend_tmp = minuend_ge_divisor ? minuend_sub_res[30:0] : minuend[30:0];
 
     // 状态机实现
-    always @ (posedge clk) begin
+    always @(posedge clk) begin
         if (rst == `RstEnable) begin
             state <= STATE_IDLE;
             ready_o <= `DivResultNotReady;
@@ -108,15 +108,15 @@ module div(
                     if (start_i == `DivStart) begin
                         // 除数为0
                         if (divisor_r == `ZeroWord) begin
-                            if (op_div | op_divu) begin
+                            if (op_div | op_divu) begin // 是除法
                                 result_o <= 32'hffffffff;
-                            end else begin
+                            end else begin      // 取余
                                 result_o <= dividend_r;
                             end
                             ready_o <= `DivResultReady;
-                            state <= STATE_IDLE;
-                            busy_o <= `False;
-                        // 除数不为0
+                            state   <= STATE_IDLE;
+                            busy_o  <= `False;
+                            // 除数不为0
                         end else begin
                             busy_o <= `True;
                             count <= 32'h40000000;
@@ -126,7 +126,8 @@ module div(
 
                             // DIV和REM这两条指令是有符号数运算指令
                             if (op_div | op_rem) begin
-                                // 被除数求补码
+                                // 被除数求补码  reg修饰,如果是负数,仿真中也是补码形式存在
+                                // 例如 dividend_r原为-15, 这里赋值dividend_r=15, minuend=0
                                 if (dividend_r[31] == 1'b1) begin
                                     dividend_r <= dividend_invert;
                                     minuend <= dividend_invert[31];
@@ -141,7 +142,7 @@ module div(
                                 minuend <= dividend_r[31];
                             end
 
-                            // 运算结束后是否要对结果取补码
+                            // 运算结束后是否要对结果取补码  符号不同就要取补码
                             if ((op_div && (dividend_r[31] ^ divisor_r[31] == 1'b1))
                                 || (op_rem && (dividend_r[31] == 1'b1))) begin
                                 invert_result <= 1'b1;
@@ -149,7 +150,7 @@ module div(
                                 invert_result <= 1'b0;
                             end
                         end
-                    end else begin
+                    end else begin  // 如果在Start状态下,start_i丢失,则要重新开始
                         state <= STATE_IDLE;
                         result_o <= `ZeroWord;
                         ready_o <= `DivResultNotReady;
@@ -183,8 +184,8 @@ module div(
                 STATE_END: begin
                     if (start_i == `DivStart) begin
                         ready_o <= `DivResultReady;
-                        state <= STATE_IDLE;
-                        busy_o <= `False;
+                        state   <= STATE_IDLE;
+                        busy_o  <= `False;
                         if (op_div | op_divu) begin
                             if (invert_result) begin
                                 result_o <= (-div_result);

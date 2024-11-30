@@ -1,4 +1,4 @@
- /*                                                                      
+/*                                                                      
  Copyright 2019 Blue Liang, liangkangnan@163.com
                                                                          
  Licensed under the Apache License, Version 2.0 (the "License");         
@@ -18,57 +18,57 @@
 
 // 译码模块
 // 纯组合逻辑电路
-module id(
+module id (
 
-	input wire rst,
+    input wire rst,
 
     // from if_id
-    input wire[`InstBus] inst_i,             // 指令内容
-    input wire[`InstAddrBus] inst_addr_i,    // 指令地址
+    input wire [    `InstBus] inst_i,      // 指令内容
+    input wire [`InstAddrBus] inst_addr_i, // 指令地址
 
     // from regs
-    input wire[`RegBus] reg1_rdata_i,        // 通用寄存器1输入数据
-    input wire[`RegBus] reg2_rdata_i,        // 通用寄存器2输入数据
+    input wire [`RegBus] reg1_rdata_i,  // 通用寄存器1输入数据
+    input wire [`RegBus] reg2_rdata_i,  // 通用寄存器2输入数据
 
-    // from csr reg
-    input wire[`RegBus] csr_rdata_i,         // CSR寄存器输入数据
+    // from csr reg "Control and Status Registers"，即控制和状态寄存器
+    input wire [`RegBus] csr_rdata_i,  // CSR寄存器输入数据,???
 
     // from ex
-    input wire ex_jump_flag_i,               // 跳转标志
+    input wire ex_jump_flag_i,  // 跳转标志,这个没用到呀
 
     // to regs
-    output reg[`RegAddrBus] reg1_raddr_o,    // 读通用寄存器1地址
-    output reg[`RegAddrBus] reg2_raddr_o,    // 读通用寄存器2地址
+    output reg [`RegAddrBus] reg1_raddr_o,  // 读通用寄存器1地址
+    output reg [`RegAddrBus] reg2_raddr_o,  // 读通用寄存器2地址
 
     // to csr reg
-    output reg[`MemAddrBus] csr_raddr_o,     // 读CSR寄存器地址
+    output reg [`MemAddrBus] csr_raddr_o,  // 读CSR寄存器地址
 
     // to ex
-    output reg[`MemAddrBus] op1_o,
-    output reg[`MemAddrBus] op2_o,
-    output reg[`MemAddrBus] op1_jump_o,
-    output reg[`MemAddrBus] op2_jump_o,
-    output reg[`InstBus] inst_o,             // 指令内容
-    output reg[`InstAddrBus] inst_addr_o,    // 指令地址
-    output reg[`RegBus] reg1_rdata_o,        // 通用寄存器1数据
-    output reg[`RegBus] reg2_rdata_o,        // 通用寄存器2数据
-    output reg reg_we_o,                     // 写通用寄存器标志
-    output reg[`RegAddrBus] reg_waddr_o,     // 写通用寄存器地址
-    output reg csr_we_o,                     // 写CSR寄存器标志
-    output reg[`RegBus] csr_rdata_o,         // CSR寄存器数据
-    output reg[`MemAddrBus] csr_waddr_o      // 写CSR寄存器地址
+    output reg [ `MemAddrBus] op1_o,        // ??? 这四个是什么
+    output reg [ `MemAddrBus] op2_o,
+    output reg [ `MemAddrBus] op1_jump_o,
+    output reg [ `MemAddrBus] op2_jump_o,
+    output reg [    `InstBus] inst_o,        // 指令内容
+    output reg [`InstAddrBus] inst_addr_o,   // 指令地址
+    output reg [     `RegBus] reg1_rdata_o,  // 通用寄存器1数据
+    output reg [     `RegBus] reg2_rdata_o,  // 通用寄存器2数据
+    output reg                reg_we_o,      // 写通用寄存器标志
+    output reg [ `RegAddrBus] reg_waddr_o,   // 写通用寄存器地址
+    output reg                csr_we_o,      // 写CSR寄存器标志
+    output reg [     `RegBus] csr_rdata_o,   // CSR寄存器数据
+    output reg [ `MemAddrBus] csr_waddr_o    // 写CSR寄存器地址
 
-    );
+);
 
-    wire[6:0] opcode = inst_i[6:0];
-    wire[2:0] funct3 = inst_i[14:12];
-    wire[6:0] funct7 = inst_i[31:25];
-    wire[4:0] rd = inst_i[11:7];
-    wire[4:0] rs1 = inst_i[19:15];
-    wire[4:0] rs2 = inst_i[24:20];
+    wire [6:0] opcode = inst_i[6:0];
+    wire [2:0] funct3 = inst_i[14:12];
+    wire [6:0] funct7 = inst_i[31:25];
+    wire [4:0] rd = inst_i[11:7];
+    wire [4:0] rs1 = inst_i[19:15];
+    wire [4:0] rs2 = inst_i[24:20];
 
 
-    always @ (*) begin
+    always @(*) begin
         inst_o = inst_i;
         inst_addr_o = inst_addr_i;
         reg1_rdata_o = reg1_rdata_i;
@@ -153,14 +153,14 @@ module id(
                     reg2_raddr_o = `ZeroReg;
                 end
             end
-            `INST_TYPE_L: begin
+            `INST_TYPE_L: begin  // 内存访问指令
                 case (funct3)
                     `INST_LB, `INST_LH, `INST_LW, `INST_LBU, `INST_LHU: begin
                         reg1_raddr_o = rs1;
                         reg2_raddr_o = `ZeroReg;
                         reg_we_o = `WriteEnable;
                         reg_waddr_o = rd;
-                        op1_o = reg1_rdata_i;
+                        op1_o = reg1_rdata_i;   // 这里预先计算访存的地址
                         op2_o = {{20{inst_i[31]}}, inst_i[31:20]};
                     end
                     default: begin
@@ -171,7 +171,7 @@ module id(
                     end
                 endcase
             end
-            `INST_TYPE_S: begin
+            `INST_TYPE_S: begin  // 内存访问指令
                 case (funct3)
                     `INST_SB, `INST_SW, `INST_SH: begin
                         reg1_raddr_o = rs1;
@@ -198,8 +198,11 @@ module id(
                         reg_waddr_o = `ZeroReg;
                         op1_o = reg1_rdata_i;
                         op2_o = reg2_rdata_i;
+                        // 这里只是把ex.v中的跳转地址进行提前计算了
                         op1_jump_o = inst_addr_i;
-                        op2_jump_o = {{20{inst_i[31]}}, inst_i[7], inst_i[30:25], inst_i[11:8], 1'b0};
+                        op2_jump_o = {
+                            {20{inst_i[31]}}, inst_i[7], inst_i[30:25], inst_i[11:8], 1'b0
+                        };
                     end
                     default: begin
                         reg1_raddr_o = `ZeroReg;

@@ -1,4 +1,4 @@
- /*                                                                      
+/*                                                                      
  Copyright 2019 Blue Liang, liangkangnan@163.com
                                                                          
  Licensed under the Apache License, Version 2.0 (the "License");         
@@ -18,117 +18,117 @@
 
 // 执行模块
 // 纯组合逻辑电路
-module ex(
+module ex (
 
     input wire rst,
 
     // from id
-    input wire[`InstBus] inst_i,            // 指令内容
-    input wire[`InstAddrBus] inst_addr_i,   // 指令地址
-    input wire reg_we_i,                    // 是否写通用寄存器
-    input wire[`RegAddrBus] reg_waddr_i,    // 写通用寄存器地址
-    input wire[`RegBus] reg1_rdata_i,       // 通用寄存器1输入数据
-    input wire[`RegBus] reg2_rdata_i,       // 通用寄存器2输入数据
-    input wire csr_we_i,                    // 是否写CSR寄存器
-    input wire[`MemAddrBus] csr_waddr_i,    // 写CSR寄存器地址
-    input wire[`RegBus] csr_rdata_i,        // CSR寄存器输入数据
-    input wire int_assert_i,                // 中断发生标志
-    input wire[`InstAddrBus] int_addr_i,    // 中断跳转地址
-    input wire[`MemAddrBus] op1_i,
-    input wire[`MemAddrBus] op2_i,
-    input wire[`MemAddrBus] op1_jump_i,
-    input wire[`MemAddrBus] op2_jump_i,
+    input wire [    `InstBus] inst_i,        // 指令内容
+    input wire [`InstAddrBus] inst_addr_i,   // 指令地址
+    input wire                reg_we_i,      // 是否写通用寄存器
+    input wire [ `RegAddrBus] reg_waddr_i,   // 写通用寄存器地址
+    input wire [     `RegBus] reg1_rdata_i,  // 通用寄存器1输入数据
+    input wire [     `RegBus] reg2_rdata_i,  // 通用寄存器2输入数据
+    input wire                csr_we_i,      // 是否写CSR寄存器
+    input wire [ `MemAddrBus] csr_waddr_i,   // 写CSR寄存器地址
+    input wire [     `RegBus] csr_rdata_i,   // CSR寄存器输入数据
+    input wire                int_assert_i,  // 中断发生标志
+    input wire [`InstAddrBus] int_addr_i,    // 中断跳转地址
+    input wire [ `MemAddrBus] op1_i,
+    input wire [ `MemAddrBus] op2_i,
+    input wire [ `MemAddrBus] op1_jump_i,
+    input wire [ `MemAddrBus] op2_jump_i,
 
     // from mem
-    input wire[`MemBus] mem_rdata_i,        // 内存输入数据
+    input wire [`MemBus] mem_rdata_i,  // 内存输入数据
 
     // from div
-    input wire div_ready_i,                 // 除法运算完成标志
-    input wire[`RegBus] div_result_i,       // 除法运算结果
-    input wire div_busy_i,                  // 除法运算忙标志
-    input wire[`RegAddrBus] div_reg_waddr_i,// 除法运算结束后要写的寄存器地址
+    input wire               div_ready_i,     // 除法运算完成标志
+    input wire [    `RegBus] div_result_i,    // 除法运算结果
+    input wire               div_busy_i,      // 除法运算忙标志
+    input wire [`RegAddrBus] div_reg_waddr_i, // 除法运算结束后要写的寄存器地址
 
     // to mem
-    output reg[`MemBus] mem_wdata_o,        // 写内存数据
-    output reg[`MemAddrBus] mem_raddr_o,    // 读内存地址
-    output reg[`MemAddrBus] mem_waddr_o,    // 写内存地址
-    output wire mem_we_o,                   // 是否要写内存
-    output wire mem_req_o,                  // 请求访问内存标志
+    output reg  [    `MemBus] mem_wdata_o,  // 写内存数据
+    output reg  [`MemAddrBus] mem_raddr_o,  // 读内存地址
+    output reg  [`MemAddrBus] mem_waddr_o,  // 写内存地址
+    output wire               mem_we_o,     // 是否要写内存
+    output wire               mem_req_o,    // 请求访问内存标志
 
     // to regs
-    output wire[`RegBus] reg_wdata_o,       // 写寄存器数据
-    output wire reg_we_o,                   // 是否要写通用寄存器
-    output wire[`RegAddrBus] reg_waddr_o,   // 写通用寄存器地址
+    output wire [    `RegBus] reg_wdata_o,  // 写寄存器数据
+    output wire               reg_we_o,     // 是否要写通用寄存器
+    output wire [`RegAddrBus] reg_waddr_o,  // 写通用寄存器地址
 
     // to csr reg
-    output reg[`RegBus] csr_wdata_o,        // 写CSR寄存器数据
-    output wire csr_we_o,                   // 是否要写CSR寄存器
-    output wire[`MemAddrBus] csr_waddr_o,   // 写CSR寄存器地址
+    output reg  [    `RegBus] csr_wdata_o,  // 写CSR寄存器数据
+    output wire               csr_we_o,     // 是否要写CSR寄存器
+    output wire [`MemAddrBus] csr_waddr_o,  // 写CSR寄存器地址
 
     // to div
-    output wire div_start_o,                // 开始除法运算标志
-    output reg[`RegBus] div_dividend_o,     // 被除数
-    output reg[`RegBus] div_divisor_o,      // 除数
-    output reg[2:0] div_op_o,               // 具体是哪一条除法指令
-    output reg[`RegAddrBus] div_reg_waddr_o,// 除法运算结束后要写的寄存器地址
+    output wire               div_start_o,     // 开始除法运算标志
+    output reg  [    `RegBus] div_dividend_o,  // 被除数
+    output reg  [    `RegBus] div_divisor_o,   // 除数
+    output reg  [        2:0] div_op_o,        // 具体是哪一条除法指令
+    output reg  [`RegAddrBus] div_reg_waddr_o, // 除法运算结束后要写的寄存器地址
 
     // to ctrl
-    output wire hold_flag_o,                // 是否暂停标志
-    output wire jump_flag_o,                // 是否跳转标志
-    output wire[`InstAddrBus] jump_addr_o   // 跳转目的地址
+    output wire                hold_flag_o,  // 是否暂停标志
+    output wire                jump_flag_o,  // 是否跳转标志
+    output wire [`InstAddrBus] jump_addr_o   // 跳转目的地址
 
-    );
+);
 
-    wire[1:0] mem_raddr_index;
-    wire[1:0] mem_waddr_index;
-    wire[`DoubleRegBus] mul_temp;
-    wire[`DoubleRegBus] mul_temp_invert;
-    wire[31:0] sr_shift;
-    wire[31:0] sri_shift;
-    wire[31:0] sr_shift_mask;
-    wire[31:0] sri_shift_mask;
-    wire[31:0] op1_add_op2_res;
-    wire[31:0] op1_jump_add_op2_jump_res;
-    wire[31:0] reg1_data_invert;
-    wire[31:0] reg2_data_invert;
-    wire op1_ge_op2_signed;
-    wire op1_ge_op2_unsigned;
-    wire op1_eq_op2;
-    reg[`RegBus] mul_op1;
-    reg[`RegBus] mul_op2;
-    wire[6:0] opcode;
-    wire[2:0] funct3;
-    wire[6:0] funct7;
-    wire[4:0] rd;
-    wire[4:0] uimm;
-    reg[`RegBus] reg_wdata;
-    reg reg_we;
-    reg[`RegAddrBus] reg_waddr;
-    reg[`RegBus] div_wdata;
-    reg div_we;
-    reg[`RegAddrBus] div_waddr;
-    reg div_hold_flag;
-    reg div_jump_flag;
-    reg[`InstAddrBus] div_jump_addr;
-    reg hold_flag;
-    reg jump_flag;
-    reg[`InstAddrBus] jump_addr;
-    reg mem_we;
-    reg mem_req;
-    reg div_start;
+    wire [          1:0 ] mem_raddr_index;
+    wire [          1:0 ] mem_waddr_index;
+    wire [`DoubleRegBus]  mul_temp;
+    wire [`DoubleRegBus]  mul_temp_invert;
+    wire [         31:0 ] sr_shift;
+    wire [         31:0 ] sri_shift;
+    wire [         31:0 ] sr_shift_mask;
+    wire [         31:0 ] sri_shift_mask;
+    wire [         31:0 ] op1_add_op2_res;
+    wire [         31:0 ] op1_jump_add_op2_jump_res;
+    wire [         31:0 ] reg1_data_invert;
+    wire [         31:0 ] reg2_data_invert;
+    wire                  op1_ge_op2_signed;
+    wire                  op1_ge_op2_unsigned;
+    wire                  op1_eq_op2;
+    reg  [      `RegBus]  mul_op1;
+    reg  [      `RegBus]  mul_op2;
+    wire [          6:0 ] opcode;
+    wire [          2:0 ] funct3;
+    wire [          6:0 ] funct7;
+    wire [          4:0 ] rd;
+    wire [          4:0 ] uimm;
+    reg  [      `RegBus]  reg_wdata;
+    reg                   reg_we;
+    reg  [  `RegAddrBus]  reg_waddr;
+    reg  [      `RegBus]  div_wdata;
+    reg                   div_we;
+    reg  [  `RegAddrBus]  div_waddr;
+    reg                   div_hold_flag;
+    reg                   div_jump_flag;
+    reg  [ `InstAddrBus]  div_jump_addr;
+    reg                   hold_flag;
+    reg                   jump_flag;
+    reg  [ `InstAddrBus]  jump_addr;
+    reg                   mem_we;
+    reg                   mem_req;
+    reg                   div_start;
 
     assign opcode = inst_i[6:0];
     assign funct3 = inst_i[14:12];
     assign funct7 = inst_i[31:25];
     assign rd = inst_i[11:7];
-    assign uimm = inst_i[19:15];
+    assign uimm = inst_i[19:15];  // Unsigned immediate 无符号立即数
 
     assign sr_shift = reg1_rdata_i >> reg2_rdata_i[4:0];
     assign sri_shift = reg1_rdata_i >> inst_i[24:20];
     assign sr_shift_mask = 32'hffffffff >> reg2_rdata_i[4:0];
     assign sri_shift_mask = 32'hffffffff >> inst_i[24:20];
 
-    assign op1_add_op2_res = op1_i + op2_i;
+    assign op1_add_op2_res = op1_i + op2_i;     // 访存的地址具体表达式在id中预先计算了
     assign op1_jump_add_op2_jump_res = op1_jump_i + op2_jump_i;
 
     assign reg1_data_invert = ~reg1_rdata_i + 1;
@@ -143,33 +143,35 @@ module ex(
     assign mul_temp = mul_op1 * mul_op2;
     assign mul_temp_invert = ~mul_temp + 1;
 
+    // mem_raddr_index是取了mem_raddr_o的低两位
     assign mem_raddr_index = (reg1_rdata_i + {{20{inst_i[31]}}, inst_i[31:20]}) & 2'b11;
     assign mem_waddr_index = (reg1_rdata_i + {{20{inst_i[31]}}, inst_i[31:25], inst_i[11:7]}) & 2'b11;
 
-    assign div_start_o = (int_assert_i == `INT_ASSERT)? `DivStop: div_start;
+    assign div_start_o = (int_assert_i == `INT_ASSERT) ? `DivStop : div_start;
 
+    // ? ? ?  reg_wdata是访问内存得到的数据,要写到rd寄存器中
     assign reg_wdata_o = reg_wdata | div_wdata;
     // 响应中断时不写通用寄存器
-    assign reg_we_o = (int_assert_i == `INT_ASSERT)? `WriteDisable: (reg_we || div_we);
+    assign reg_we_o = (int_assert_i == `INT_ASSERT) ? `WriteDisable : (reg_we || div_we);
     assign reg_waddr_o = reg_waddr | div_waddr;
 
     // 响应中断时不写内存
-    assign mem_we_o = (int_assert_i == `INT_ASSERT)? `WriteDisable: mem_we;
+    assign mem_we_o = (int_assert_i == `INT_ASSERT) ? `WriteDisable : mem_we;
 
     // 响应中断时不向总线请求访问内存
-    assign mem_req_o = (int_assert_i == `INT_ASSERT)? `RIB_NREQ: mem_req;
+    assign mem_req_o = (int_assert_i == `INT_ASSERT) ? `RIB_NREQ : mem_req;
 
     assign hold_flag_o = hold_flag || div_hold_flag;
     assign jump_flag_o = jump_flag || div_jump_flag || ((int_assert_i == `INT_ASSERT)? `JumpEnable: `JumpDisable);
-    assign jump_addr_o = (int_assert_i == `INT_ASSERT)? int_addr_i: (jump_addr | div_jump_addr);
+    assign jump_addr_o = (int_assert_i == `INT_ASSERT) ? int_addr_i : (jump_addr | div_jump_addr);
 
     // 响应中断时不写CSR寄存器
-    assign csr_we_o = (int_assert_i == `INT_ASSERT)? `WriteDisable: csr_we_i;
+    assign csr_we_o = (int_assert_i == `INT_ASSERT) ? `WriteDisable : csr_we_i;
     assign csr_waddr_o = csr_waddr_i;
 
 
     // 处理乘法指令
-    always @ (*) begin
+    always @(*) begin
         if ((opcode == `INST_TYPE_R_M) && (funct7 == 7'b0000001)) begin
             case (funct3)
                 `INST_MUL, `INST_MULHU: begin
@@ -177,12 +179,12 @@ module ex(
                     mul_op2 = reg2_rdata_i;
                 end
                 `INST_MULHSU: begin
-                    mul_op1 = (reg1_rdata_i[31] == 1'b1)? (reg1_data_invert): reg1_rdata_i;
+                    mul_op1 = (reg1_rdata_i[31] == 1'b1) ? (reg1_data_invert) : reg1_rdata_i;
                     mul_op2 = reg2_rdata_i;
                 end
                 `INST_MULH: begin
-                    mul_op1 = (reg1_rdata_i[31] == 1'b1)? (reg1_data_invert): reg1_rdata_i;
-                    mul_op2 = (reg2_rdata_i[31] == 1'b1)? (reg2_data_invert): reg2_rdata_i;
+                    mul_op1 = (reg1_rdata_i[31] == 1'b1) ? (reg1_data_invert) : reg1_rdata_i;
+                    mul_op2 = (reg2_rdata_i[31] == 1'b1) ? (reg2_data_invert) : reg2_rdata_i;
                 end
                 default: begin
                     mul_op1 = reg1_rdata_i;
@@ -196,7 +198,7 @@ module ex(
     end
 
     // 处理除法指令
-    always @ (*) begin
+    always @(*) begin
         div_dividend_o = reg1_rdata_i;
         div_divisor_o = reg2_rdata_i;
         div_op_o = funct3;
@@ -245,7 +247,7 @@ module ex(
     end
 
     // 执行
-    always @ (*) begin
+    always @(*) begin
         reg_we = reg_we_i;
         reg_waddr = reg_waddr_i;
         mem_req = `RIB_NREQ;
@@ -254,7 +256,7 @@ module ex(
         case (opcode)
             `INST_TYPE_I: begin
                 case (funct3)
-                    `INST_ADDI: begin
+                    `INST_ADDI: begin  // 首先对当前指令不涉及到的操作置回默认值
                         jump_flag = `JumpDisable;
                         hold_flag = `HoldDisable;
                         jump_addr = `ZeroWord;
@@ -482,7 +484,9 @@ module ex(
                             mem_raddr_o = `ZeroWord;
                             mem_waddr_o = `ZeroWord;
                             mem_we = `WriteDisable;
-                            case ({reg1_rdata_i[31], reg2_rdata_i[31]})
+                            case ({
+                                reg1_rdata_i[31], reg2_rdata_i[31]
+                            })
                                 2'b00: begin
                                     reg_wdata = mul_temp[63:32];
                                 end
@@ -647,15 +651,20 @@ module ex(
                         mem_req = `RIB_REQ;
                         mem_waddr_o = op1_add_op2_res;
                         mem_raddr_o = op1_add_op2_res;
+                        // sb指令置改变读出来的32位内存数据中对应的直接,其他三个字节的数据保持不变
                         case (mem_waddr_index)
                             2'b00: begin
                                 mem_wdata_o = {mem_rdata_i[31:8], reg2_rdata_i[7:0]};
                             end
                             2'b01: begin
-                                mem_wdata_o = {mem_rdata_i[31:16], reg2_rdata_i[7:0], mem_rdata_i[7:0]};
+                                mem_wdata_o = {
+                                    mem_rdata_i[31:16], reg2_rdata_i[7:0], mem_rdata_i[7:0]
+                                };
                             end
                             2'b10: begin
-                                mem_wdata_o = {mem_rdata_i[31:24], reg2_rdata_i[7:0], mem_rdata_i[15:0]};
+                                mem_wdata_o = {
+                                    mem_rdata_i[31:24], reg2_rdata_i[7:0], mem_rdata_i[15:0]
+                                };
                             end
                             default: begin
                                 mem_wdata_o = {reg2_rdata_i[7:0], mem_rdata_i[23:0]};
@@ -825,27 +834,27 @@ module ex(
                 case (funct3)
                     `INST_CSRRW: begin
                         csr_wdata_o = reg1_rdata_i;
-                        reg_wdata = csr_rdata_i;
+                        reg_wdata   = csr_rdata_i;
                     end
                     `INST_CSRRS: begin
                         csr_wdata_o = reg1_rdata_i | csr_rdata_i;
-                        reg_wdata = csr_rdata_i;
+                        reg_wdata   = csr_rdata_i;
                     end
                     `INST_CSRRC: begin
                         csr_wdata_o = csr_rdata_i & (~reg1_rdata_i);
-                        reg_wdata = csr_rdata_i;
+                        reg_wdata   = csr_rdata_i;
                     end
                     `INST_CSRRWI: begin
                         csr_wdata_o = {27'h0, uimm};
-                        reg_wdata = csr_rdata_i;
+                        reg_wdata   = csr_rdata_i;
                     end
                     `INST_CSRRSI: begin
                         csr_wdata_o = {27'h0, uimm} | csr_rdata_i;
-                        reg_wdata = csr_rdata_i;
+                        reg_wdata   = csr_rdata_i;
                     end
                     `INST_CSRRCI: begin
                         csr_wdata_o = (~{27'h0, uimm}) & csr_rdata_i;
-                        reg_wdata = csr_rdata_i;
+                        reg_wdata   = csr_rdata_i;
                     end
                     default: begin
                         jump_flag = `JumpDisable;

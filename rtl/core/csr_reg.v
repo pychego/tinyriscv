@@ -1,4 +1,4 @@
- /*                                                                      
+/*                                                                      
  Copyright 2020 Blue Liang, liangkangnan@163.com
                                                                          
  Licensed under the Apache License, Version 2.0 (the "License");         
@@ -17,53 +17,54 @@
 `include "defines.v"
 
 // CSR寄存器模块
-module csr_reg(
+// 这个模块感觉就是中转站,没干什么实际的事情,都是直接将输入进行输出了
+module csr_reg (
 
     input wire clk,
     input wire rst,
 
     // form ex
-    input wire we_i,                        // ex模块写寄存器标志
-    input wire[`MemAddrBus] raddr_i,        // ex模块读寄存器地址
-    input wire[`MemAddrBus] waddr_i,        // ex模块写寄存器地址
-    input wire[`RegBus] data_i,             // ex模块写寄存器数据
+    input wire               we_i,     // ex模块写寄存器标志
+    input wire [`MemAddrBus] raddr_i,  // ex模块读寄存器地址
+    input wire [`MemAddrBus] waddr_i,  // ex模块写寄存器地址
+    input wire [    `RegBus] data_i,   // ex模块写寄存器数据
 
     // from clint
-    input wire clint_we_i,                  // clint模块写寄存器标志
-    input wire[`MemAddrBus] clint_raddr_i,  // clint模块读寄存器地址
-    input wire[`MemAddrBus] clint_waddr_i,  // clint模块写寄存器地址
-    input wire[`RegBus] clint_data_i,       // clint模块写寄存器数据
+    input wire               clint_we_i,     // clint模块写寄存器标志
+    input wire [`MemAddrBus] clint_raddr_i,  // clint模块读寄存器地址
+    input wire [`MemAddrBus] clint_waddr_i,  // clint模块写寄存器地址
+    input wire [    `RegBus] clint_data_i,   // clint模块写寄存器数据
 
-    output wire global_int_en_o,            // 全局中断使能标志
+    output wire global_int_en_o,  // 全局中断使能标志
 
     // to clint
-    output reg[`RegBus] clint_data_o,       // clint模块读寄存器数据
-    output wire[`RegBus] clint_csr_mtvec,   // mtvec
-    output wire[`RegBus] clint_csr_mepc,    // mepc
-    output wire[`RegBus] clint_csr_mstatus, // mstatus
+    output reg  [`RegBus] clint_data_o,      // clint模块读寄存器数据
+    output wire [`RegBus] clint_csr_mtvec,   // mtvec
+    output wire [`RegBus] clint_csr_mepc,    // mepc
+    output wire [`RegBus] clint_csr_mstatus, // mstatus
 
     // to ex
-    output reg[`RegBus] data_o              // ex模块读寄存器数据
+    output reg [`RegBus] data_o  // ex模块读寄存器数据
 
-    );
+);
 
-    reg[`DoubleRegBus] cycle;
-    reg[`RegBus] mtvec;
-    reg[`RegBus] mcause;
-    reg[`RegBus] mepc;
-    reg[`RegBus] mie;
-    reg[`RegBus] mstatus;
-    reg[`RegBus] mscratch;
+    reg [`DoubleRegBus] cycle;
+    reg [      `RegBus] mtvec;
+    reg [      `RegBus] mcause;
+    reg [      `RegBus] mepc;
+    reg [      `RegBus] mie;
+    reg [      `RegBus] mstatus;
+    reg [      `RegBus] mscratch;
 
-    assign global_int_en_o = (mstatus[3] == 1'b1)? `True: `False;
+    assign global_int_en_o = (mstatus[3] == 1'b1) ? `True : `False;
 
-    assign clint_csr_mtvec = mtvec;
-    assign clint_csr_mepc = mepc;
-    assign clint_csr_mstatus = mstatus;
+    assign clint_csr_mtvec = mtvec; // Machine Trap Vector
+    assign clint_csr_mepc = mepc;   // Machine Exception Program Counter
+    assign clint_csr_mstatus = mstatus; // Machine Status
 
     // cycle counter
     // 复位撤销后就一直计数
-    always @ (posedge clk) begin
+    always @(posedge clk) begin
         if (rst == `RstEnable) begin
             cycle <= {`ZeroWord, `ZeroWord};
         end else begin
@@ -73,7 +74,7 @@ module csr_reg(
 
     // write reg
     // 写寄存器操作
-    always @ (posedge clk) begin
+    always @(posedge clk) begin
         if (rst == `RstEnable) begin
             mtvec <= `ZeroWord;
             mcause <= `ZeroWord;
@@ -84,7 +85,7 @@ module csr_reg(
         end else begin
             // 优先响应ex模块的写操作
             if (we_i == `WriteEnable) begin
-                case (waddr_i[11:0])
+                case (waddr_i[11:0])    // CSR reg addr
                     `CSR_MTVEC: begin
                         mtvec <= data_i;
                     end
@@ -107,7 +108,7 @@ module csr_reg(
 
                     end
                 endcase
-            // clint模块写操作
+                // clint模块写操作
             end else if (clint_we_i == `WriteEnable) begin
                 case (clint_waddr_i[11:0])
                     `CSR_MTVEC: begin
@@ -138,7 +139,7 @@ module csr_reg(
 
     // read reg
     // ex模块读CSR寄存器
-    always @ (*) begin
+    always @(*) begin
         if ((waddr_i[11:0] == raddr_i[11:0]) && (we_i == `WriteEnable)) begin
             data_o = data_i;
         end else begin
@@ -176,7 +177,7 @@ module csr_reg(
 
     // read reg
     // clint模块读CSR寄存器
-    always @ (*) begin
+    always @(*) begin
         if ((clint_waddr_i[11:0] == clint_raddr_i[11:0]) && (clint_we_i == `WriteEnable)) begin
             clint_data_o = clint_data_i;
         end else begin
