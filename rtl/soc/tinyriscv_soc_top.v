@@ -10,7 +10,7 @@
  Unless required by applicable law or agreed to in writing, software    
  distributed under the License is distributed on an "AS IS" BASIS,       
  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and     
+ See the License for the specific language gning permissions and     
  limitations under the License.                                          
  */
 
@@ -38,7 +38,7 @@ module tinyriscv_soc_top(
     input wire jtag_TDI,     // JTAG TDI引脚
     output wire jtag_TDO,    // JTAG TDO引脚
 
-    input wire spi_miso,     // SPI MISO引脚
+    input wire spi_miso,     // SPI MISO引脚 Master Input Slave Output
     output wire spi_mosi,    // SPI MOSI引脚
     output wire spi_ss,      // SPI SS引脚
     output wire spi_clk      // SPI CLK引脚
@@ -153,13 +153,13 @@ module tinyriscv_soc_top(
     tinyriscv u_tinyriscv(
         .clk(clk),
         .rst(rst),
-        .rib_ex_addr_o(m0_addr_i),
+        .rib_ex_addr_o(m0_addr_i),  // master 0 接到tinyriscv的ex接口
         .rib_ex_data_i(m0_data_o),
         .rib_ex_data_o(m0_data_i),
         .rib_ex_req_o(m0_req_i),
         .rib_ex_we_o(m0_we_i),
 
-        .rib_pc_addr_o(m1_addr_i),
+        .rib_pc_addr_o(m1_addr_i),  // master 1 接到tinyriscv的pc接口, 其他四个master接口未使用
         .rib_pc_data_i(m1_data_o),
 
         .jtag_reg_addr_i(jtag_reg_addr_o),

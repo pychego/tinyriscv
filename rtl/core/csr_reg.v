@@ -17,7 +17,10 @@
 `include "defines.v"
 
 // CSR寄存器模块
-// 这个模块感觉就是中转站,没干什么实际的事情,都是直接将输入进行输出了
+/*  这个模块感觉就是中转站,没干什么实际的事情,都是直接将输入进行输出了
+    与ex和clint交互,ex和clint都可以读写csr_reg模块的寄存器,ex优先级更高
+    CSR应该就是clint的控制器, 控制其中的寄存器
+*/
 module csr_reg (
 
     input wire clk,

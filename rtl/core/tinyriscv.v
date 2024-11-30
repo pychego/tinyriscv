@@ -22,12 +22,14 @@ module tinyriscv (
     input wire clk,
     input wire rst,
 
+    // ex与总线交互信号
     output wire [`MemAddrBus] rib_ex_addr_o,  // 读、写外设的地址
     input  wire [    `MemBus] rib_ex_data_i,  // 从外设读取的数据
     output wire [    `MemBus] rib_ex_data_o,  // 写入外设的数据
     output wire               rib_ex_req_o,   // 访问外设请求
     output wire               rib_ex_we_o,    // 写外设标志
 
+    // pc_reg取指, if_id接收总线的指令
     output wire [`MemAddrBus] rib_pc_addr_o,  // 取指地址
     input  wire [    `MemBus] rib_pc_data_i,  // 取到的指令内容
 

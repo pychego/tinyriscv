@@ -17,7 +17,7 @@
 `include "defines.v"
 
 
-// RIB总线模块
+// RIB总线模块 包含仲裁器和译码器
 module rib (
 
     input wire clk,
@@ -127,7 +127,7 @@ module rib (
             grant = grant2;
             hold_flag_o = `HoldEnable;
         end else begin
-            grant = grant1;  // 回头看主设备1是什么
+            grant = grant1;  // Master 1 是pc模块, 取指时候流水线不暂停
             hold_flag_o = `HoldDisable;
         end
     end
