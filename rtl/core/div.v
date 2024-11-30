@@ -69,7 +69,7 @@ module div (
 
     // 状态机实现
     always @(posedge clk) begin
-        if (rst == `RstEnable) begin
+        if (rst == `RstEnable) begin    // 注意rst是低电平有效,易错
             state <= STATE_IDLE;
             ready_o <= `DivResultNotReady;
             result_o <= `ZeroWord;

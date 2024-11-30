@@ -21,15 +21,16 @@ module div_tb ();
     initial begin
         dividend_i = 15;
         divisor_i = 3;
-        start_i = 1;
-        op_i = `INST_DIV;
+        start_i = 0;
+        op_i = `INST_DIVU;
         reg_waddr_i = 12;
         clk = 0;
-        rst = 1;
-        #15 rst = 0;
+        rst = 0;
+        #104 rst = 1;
+        #104 start_i = 1;
     end
 
-    always #5 clk = ~clk;
+    always #10 clk = ~clk;
 
         div u_div (
         .clk        (clk),
