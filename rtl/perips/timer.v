@@ -1,4 +1,4 @@
- /*                                                                      
+/*                                                                      
  Copyright 2020 Blue Liang, liangkangnan@163.com
                                                                          
  Licensed under the Apache License, Version 2.0 (the "License");         
@@ -18,19 +18,19 @@
 
 
 // 32 bits count up timer module
-module timer(
+module timer (
 
     input wire clk,
     input wire rst,
 
-    input wire[31:0] data_i,
-    input wire[31:0] addr_i,
-    input wire we_i,
+    input wire [31:0] data_i,
+    input wire [31:0] addr_i,
+    input wire        we_i,
 
-    output reg[31:0] data_o,
-    output wire int_sig_o
+    output reg  [31:0] data_o,
+    output wire        int_sig_o  // 给出中断信号
 
-    );
+);
 
     localparam REG_CTRL = 4'h0;
     localparam REG_COUNT = 4'h4;
@@ -39,22 +39,24 @@ module timer(
     // [0]: timer enable
     // [1]: timer int enable
     // [2]: timer int pending, write 1 to clear it
-    // addr offset: 0x00
-    reg[31:0] timer_ctrl;
+    // timer_ctrl[2] <= (timer_ctrl[2] & (~data_i[2]))
+    // pending, 等待状态: 中断处于有效状态,但是等待CPU响应该中断
+    // addr offset: 0x00, 地址偏移是自定义的
+    reg [31:0] timer_ctrl;
 
     // timer current count, read only
     // addr offset: 0x04
-    reg[31:0] timer_count;
+    reg [31:0] timer_count;
 
-    // timer expired value
+    // timer expired value 设定定时器中断发生的counter值
     // addr offset: 0x08
-    reg[31:0] timer_value;
+    reg [31:0] timer_value;
 
 
     assign int_sig_o = ((timer_ctrl[2] == 1'b1) && (timer_ctrl[1] == 1'b1))? `INT_ASSERT: `INT_DEASSERT;
 
     // counter
-    always @ (posedge clk) begin
+    always @(posedge clk) begin
         if (rst == `RstEnable) begin
             timer_count <= `ZeroWord;
         end else begin
@@ -70,9 +72,9 @@ module timer(
     end
 
     // write regs
-    always @ (posedge clk) begin
+    always @(posedge clk) begin
         if (rst == `RstEnable) begin
-            timer_ctrl <= `ZeroWord;
+            timer_ctrl  <= `ZeroWord;
             timer_value <= `ZeroWord;
         end else begin
             if (we_i == `WriteEnable) begin
@@ -84,7 +86,7 @@ module timer(
                         timer_value <= data_i;
                     end
                 endcase
-            end else begin
+            end else begin  // 如果计时器中断到了，那么就设置中断标志,并暂停timer的enable
                 if ((timer_ctrl[0] == 1'b1) && (timer_count >= timer_value)) begin
                     timer_ctrl[0] <= 1'b0;
                     timer_ctrl[2] <= 1'b1;
@@ -94,7 +96,7 @@ module timer(
     end
 
     // read regs
-    always @ (*) begin
+    always @(*) begin
         if (rst == `RstEnable) begin
             data_o = `ZeroWord;
         end else begin

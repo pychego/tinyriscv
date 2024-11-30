@@ -1,4 +1,4 @@
- /*                                                                      
+/*                                                                      
  Copyright 2020 Blue Liang, liangkangnan@163.com
                                                                          
  Licensed under the Apache License, Version 2.0 (the "License");         
@@ -17,29 +17,29 @@
 `include "../core/defines.v"
 
 
-module rom(
+module rom (
 
     input wire clk,
     input wire rst,
 
-    input wire we_i,                   // write enable
-    input wire[`MemAddrBus] addr_i,    // addr
-    input wire[`MemBus] data_i,
+    input wire               we_i,    // write enable
+    input wire [`MemAddrBus] addr_i,  // addr
+    input wire [    `MemBus] data_i,
 
-    output reg[`MemBus] data_o         // read data
+    output reg [`MemBus] data_o  // read data conbinational output
 
-    );
+);
+    // 生成包含RomNum个MemBus位的寄存器数组
+    reg [`MemBus] _rom[0:`RomNum - 1];
 
-    reg[`MemBus] _rom[0:`RomNum - 1];
 
-
-    always @ (posedge clk) begin
+    always @(posedge clk) begin
         if (we_i == `WriteEnable) begin
             _rom[addr_i[31:2]] <= data_i;
         end
     end
 
-    always @ (*) begin
+    always @(*) begin
         if (rst == `RstEnable) begin
             data_o = `ZeroWord;
         end else begin

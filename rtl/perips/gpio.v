@@ -1,4 +1,4 @@
- /*                                                                      
+/*                                                                      
  Copyright 2020 Blue Liang, liangkangnan@163.com
                                                                          
  Licensed under the Apache License, Version 2.0 (the "License");         
@@ -16,22 +16,22 @@
 
 
 // GPIO模块
-module gpio(
+module gpio (
 
     input wire clk,
-	input wire rst,
+    input wire rst,
 
-    input wire we_i,
-    input wire[31:0] addr_i,
-    input wire[31:0] data_i,
+    input wire        we_i,
+    input wire [31:0] addr_i,
+    input wire [31:0] data_i,
 
-    output reg[31:0] data_o,
+    output reg [31:0] data_o,
 
-    input wire[1:0] io_pin_i,
-    output wire[31:0] reg_ctrl,
-    output wire[31:0] reg_data
+    input  wire [ 1:0] io_pin_i,
+    output wire [31:0] reg_ctrl,
+    output wire [31:0] reg_data
 
-    );
+);
 
 
     // GPIO控制寄存器
@@ -40,10 +40,13 @@ module gpio(
     localparam GPIO_DATA = 4'h4;
 
     // 每2位控制1个IO的模式，最多支持16个IO
-    // 0: 高阻，1：输出，2：输入
-    reg[31:0] gpio_ctrl;
+    /* 这里只用到了两个io, 并且是都只规定了什么情况下输出,
+    等到真正综合的时候再仔细看看这个模块的功能吧
+    */
+    // 0: 高阻，1：输出，2：输入    
+    reg [31:0] gpio_ctrl;   // gpio中的两个寄存器
     // 输入输出数据
-    reg[31:0] gpio_data;
+    reg [31:0] gpio_data;
 
 
     assign reg_ctrl = gpio_ctrl;
@@ -51,7 +54,7 @@ module gpio(
 
 
     // 写寄存器
-    always @ (posedge clk) begin
+    always @(posedge clk) begin
         if (rst == 1'b0) begin
             gpio_data <= 32'h0;
             gpio_ctrl <= 32'h0;
@@ -77,7 +80,7 @@ module gpio(
     end
 
     // 读寄存器
-    always @ (*) begin
+    always @(*) begin
         if (rst == 1'b0) begin
             data_o = 32'h0;
         end else begin
