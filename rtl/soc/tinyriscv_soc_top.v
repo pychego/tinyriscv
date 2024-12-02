@@ -143,7 +143,8 @@ module tinyriscv_soc_top (
         if (rst == `RstEnable) begin
             over <= 1'b1;
             succ <= 1'b1;
-        end else begin
+        end else begin  // 这里是regs模块里面的内部寄存器regs
+        // 等号右边的regs[26]位宽是32位,左边的over是1位宽,所以只取regs[26]的最低位
             over <= ~u_tinyriscv.u_regs.regs[26];  // when = 1, run over
             succ <= ~u_tinyriscv.u_regs.regs[27];  // when = 1, run succ, otherwise fail
         end

@@ -1,4 +1,4 @@
- /*                                                                      
+/*                                                                      
  Copyright 2020 Blue Liang, liangkangnan@163.com
                                                                          
  Licensed under the Apache License, Version 2.0 (the "License");         
@@ -14,20 +14,22 @@
  limitations under the License.                                          
  */
 
-`define DM_RESP_VALID     1'b1
-`define DM_RESP_INVALID   1'b0
-`define DTM_REQ_VALID     1'b1
-`define DTM_REQ_INVALID   1'b0
+`define DM_RESP_VALID 1'b1
+`define DM_RESP_INVALID 1'b0
+`define DTM_REQ_VALID 1'b1
+`define DTM_REQ_INVALID 1'b0
 
-`define DTM_OP_NOP        2'b00
-`define DTM_OP_READ       2'b01
-`define DTM_OP_WRITE      2'b10
+`define DTM_OP_NOP 2'b00
+`define DTM_OP_READ 2'b01
+`define DTM_OP_WRITE 2'b10
 
 
+// Debug Module
 module jtag_dm #(
     parameter DMI_ADDR_BITS = 6,
     parameter DMI_DATA_BITS = 32,
-    parameter DMI_OP_BITS = 2)(
+    parameter DMI_OP_BITS   = 2
+) (
 
     clk,
     rst_n,
@@ -55,7 +57,7 @@ module jtag_dm #(
     dm_halt_req_o,
     dm_reset_req_o
 
-    );
+);
 
     parameter DM_RESP_BITS = DMI_ADDR_BITS + DMI_DATA_BITS + DMI_OP_BITS;
     parameter DTM_REQ_BITS = DMI_ADDR_BITS + DMI_DATA_BITS + DMI_OP_BITS;
@@ -64,75 +66,79 @@ module jtag_dm #(
     // 输入输出信号
     input wire clk;
     input wire rst_n;
+    // rx
     output wire dm_ack_o;
     input wire dtm_req_valid_i;
-    input wire[DTM_REQ_BITS-1:0] dtm_req_data_i;
+    input wire [DTM_REQ_BITS-1:0] dtm_req_data_i;
+    // tx
     input wire dtm_ack_i;
-    output wire[DM_RESP_BITS-1:0] dm_resp_data_o;
+    output wire [DM_RESP_BITS-1:0] dm_resp_data_o;
     output wire dm_resp_valid_o;
+
     output wire dm_reg_we_o;
-    output wire[4:0] dm_reg_addr_o;
-    output wire[31:0] dm_reg_wdata_o;
-    input wire[31:0] dm_reg_rdata_i;
+    output wire [4:0] dm_reg_addr_o;
+    output wire [31:0] dm_reg_wdata_o;
+    input wire [31:0] dm_reg_rdata_i;
     output wire dm_mem_we_o;
-    output wire[31:0] dm_mem_addr_o;
-    output wire[31:0] dm_mem_wdata_o;
-    input wire[31:0] dm_mem_rdata_i;
+    output wire [31:0] dm_mem_addr_o;
+    output wire [31:0] dm_mem_wdata_o;
+    input wire [31:0] dm_mem_rdata_i;
+
     output wire dm_op_req_o;
     output wire dm_halt_req_o;
     output wire dm_reset_req_o;
 
     // DM模块寄存器
-    reg[31:0] dcsr;
-    reg[31:0] dmstatus;
-    reg[31:0] dmcontrol;
-    reg[31:0] hartinfo;
-    reg[31:0] abstractcs;
-    reg[31:0] data0;
-    reg[31:0] sbcs;
-    reg[31:0] sbaddress0;
-    reg[31:0] sbdata0;
-    reg[31:0] command;
+    reg [31:0] dcsr;
+    reg [31:0] dmstatus;
+    reg [31:0] dmcontrol;
+    reg [31:0] hartinfo;
+    reg [31:0] abstractcs;
+    reg [31:0] data0;
+    reg [31:0] sbcs;
+    reg [31:0] sbaddress0;
+    reg [31:0] sbdata0;
+    reg [31:0] command;
 
     // DM模块寄存器地址
-    localparam DCSR       = 16'h7b0;
-    localparam DMSTATUS   = 6'h11;
-    localparam DMCONTROL  = 6'h10;
-    localparam HARTINFO   = 6'h12;
+    localparam DCSR = 16'h7b0;
+    localparam DMSTATUS = 6'h11;
+    localparam DMCONTROL = 6'h10;
+    localparam HARTINFO = 6'h12;
     localparam ABSTRACTCS = 6'h16;
-    localparam DATA0      = 6'h04;
-    localparam SBCS       = 6'h38;
+    localparam DATA0 = 6'h04;
+    localparam SBCS = 6'h38;
     localparam SBADDRESS0 = 6'h39;
-    localparam SBDATA0    = 6'h3C;
-    localparam COMMAND    = 6'h17;
-    localparam DPC        = 16'h7b1;
+    localparam SBDATA0 = 6'h3C;
+    localparam COMMAND = 6'h17;
+    localparam DPC = 16'h7b1;
 
     localparam OP_SUCC = 2'b00;
 
-    reg[31:0] read_data;
+    reg [31:0] read_data;
     reg dm_reg_we;
-    reg[4:0] dm_reg_addr;
-    reg[31:0] dm_reg_wdata;
+    reg [4:0] dm_reg_addr;
+    reg [31:0] dm_reg_wdata;
     reg dm_mem_we;
-    reg[31:0] dm_mem_addr;
-    reg[31:0] dm_mem_wdata;
+    reg [31:0] dm_mem_addr;
+    reg [31:0] dm_mem_wdata;
     reg dm_halt_req;
     reg dm_reset_req;
     reg need_resp;
     reg is_read_reg;
     wire rx_valid;
-    wire[DTM_REQ_BITS-1:0] rx_data;
+    wire [DTM_REQ_BITS-1:0] rx_data;
 
-    wire[31:0] sbaddress0_next = sbaddress0 + 4;
-    wire[DM_RESP_BITS-1:0] dm_resp_data;
+    wire [31:0] sbaddress0_next = sbaddress0 + 4;
+    wire [DM_RESP_BITS-1:0] dm_resp_data;
 
-    wire[DMI_OP_BITS-1:0] op = rx_data[DMI_OP_BITS-1:0];
-    wire[DMI_DATA_BITS-1:0] data = rx_data[DMI_DATA_BITS+DMI_OP_BITS-1:DMI_OP_BITS];
-    wire[DMI_ADDR_BITS-1:0] address = rx_data[DTM_REQ_BITS-1:DMI_DATA_BITS+DMI_OP_BITS];
+    wire [DMI_OP_BITS-1:0] op = rx_data[DMI_OP_BITS-1:0];
+    wire [DMI_DATA_BITS-1:0] data = rx_data[DMI_DATA_BITS+DMI_OP_BITS-1:DMI_OP_BITS];
+    wire [DMI_ADDR_BITS-1:0] address = rx_data[DTM_REQ_BITS-1:DMI_DATA_BITS+DMI_OP_BITS];
 
     wire read_dmstatus = (op == `DTM_OP_READ) & (address == DMSTATUS);
 
-    always @ (posedge clk or negedge rst_n) begin
+    always @(posedge clk or negedge rst_n) begin
         if (!rst_n) begin
             dm_mem_we <= 1'b0;
             dm_reg_we <= 1'b0;
@@ -194,13 +200,13 @@ module jtag_dm #(
                                 end
                             end
                             default: begin
-                                read_data <= {(DMI_DATA_BITS){1'b0}};
+                                read_data <= {(DMI_DATA_BITS) {1'b0}};
                             end
                         endcase
                     end
 
                     `DTM_OP_WRITE: begin
-                        read_data <= {(DMI_DATA_BITS){1'b0}};
+                        read_data <= {(DMI_DATA_BITS) {1'b0}};
                         case (address)
                             DMCONTROL: begin
                                 // reset DM module
@@ -213,7 +219,7 @@ module jtag_dm #(
                                     dmcontrol <= data;
                                     dm_halt_req <= 1'b0;
                                     dm_reset_req <= 1'b0;
-                                // DM is active
+                                    // DM is active
                                 end else begin
                                     // we have only one hart
                                     dmcontrol <= (data & ~(32'h3fffc0)) | 32'h10000;
@@ -222,7 +228,7 @@ module jtag_dm #(
                                         dm_halt_req <= 1'b1;
                                         // clear ALLRUNNING ANYRUNNING and set ALLHALTED
                                         dmstatus <= {dmstatus[31:12], 4'h3, dmstatus[7:0]};
-                                    // resume
+                                        // resume
                                     end else if (dm_halt_req == 1'b1 && data[30] == 1'b1) begin
                                         dm_halt_req <= 1'b0;
                                         // set ALLRUNNING ANYRUNNING and clear ALLHALTED
@@ -247,13 +253,15 @@ module jtag_dm #(
                                                 end else if (data[15:0] < 16'h1020) begin
                                                     is_read_reg <= 1'b1;
                                                 end
-                                            // write
+                                                // write
                                             end else begin
                                                 // when write dpc, we reset cpu here
                                                 if (data[15:0] == DPC) begin
                                                     dm_reset_req <= 1'b1;
                                                     dm_halt_req <= 1'b0;
-                                                    dmstatus <= {dmstatus[31:12], 4'hc, dmstatus[7:0]};
+                                                    dmstatus <= {
+                                                        dmstatus[31:12], 4'hc, dmstatus[7:0]
+                                                    };
                                                 end else if (data[15:0] < 16'h1020) begin
                                                     dm_reg_we <= 1'b1;
                                                     dm_reg_wdata <= data0;
@@ -288,7 +296,7 @@ module jtag_dm #(
                     end
 
                     `DTM_OP_NOP: begin
-                        read_data <= {(DMI_DATA_BITS){1'b0}};
+                        read_data <= {(DMI_DATA_BITS) {1'b0}};
                     end
                 endcase
             end else begin
@@ -316,27 +324,27 @@ module jtag_dm #(
 
     full_handshake_tx #(
         .DW(DM_RESP_BITS)
-    ) tx(
-        .clk(clk),
-        .rst_n(rst_n),
-        .ack_i(dtm_ack_i),
-        .req_i(need_resp),
+    ) tx (
+        .clk       (clk),
+        .rst_n     (rst_n),
+        .ack_i     (dtm_ack_i),
+        .req_i     (need_resp),
         .req_data_i(dm_resp_data),
-        .idle_o(tx_idle),
-        .req_o(dm_resp_valid_o),
+        .idle_o    (tx_idle),
+        .req_o     (dm_resp_valid_o),
         .req_data_o(dm_resp_data_o)
     );
 
     full_handshake_rx #(
         .DW(DTM_REQ_BITS)
-    ) rx(
-        .clk(clk),
-        .rst_n(rst_n),
-        .req_i(dtm_req_valid_i),
-        .req_data_i(dtm_req_data_i),
-        .ack_o(dm_ack_o),
+    ) rx (
+        .clk        (clk),
+        .rst_n      (rst_n),
+        .req_i      (dtm_req_valid_i),
+        .req_data_i (dtm_req_data_i),
+        .ack_o      (dm_ack_o),
         .recv_data_o(rx_data),
-        .recv_rdy_o(rx_valid)
+        .recv_rdy_o (rx_valid)
     );
 
 endmodule
