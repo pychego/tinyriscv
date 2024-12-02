@@ -30,7 +30,7 @@ module full_handshake_tx #(
     // from rx
     input wire ack_i,  // RX端应答信号
 
-    // from tx
+    // from tx ??? 来自其他tx模块发送的信号
     input wire          req_i,      // TX端请求信号，只需持续一个时钟
     input wire [DW-1:0] req_data_i, // TX端要发送的数据，只需持续一个时钟
 
@@ -121,7 +121,7 @@ module full_handshake_tx #(
                     if (req_i == 1'b1) begin
                         idle <= 1'b0;
                         req <= req_i;
-                        req_data <= req_data_i;
+                        req_data <= req_data_i;     // 锁存TX请求数据
                     end else begin
                         idle <= 1'b1;
                         req  <= 1'b0;

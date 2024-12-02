@@ -27,11 +27,11 @@ module full_handshake_rx #(
     input wire clk,   // RX端时钟信号
     input wire rst_n, // RX端复位信号
 
-    // from tx
+    // from full_handshake_tx
     input wire          req_i,      // TX端请求信号
     input wire [DW-1:0] req_data_i, // TX端输入数据
 
-    // to tx
+    // to full_handshake_tx
     output wire ack_o,  // RX端应答TX端信号
 
     // to rx
