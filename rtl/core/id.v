@@ -84,7 +84,7 @@ module id (
 
         case (opcode)
             `INST_TYPE_I: begin
-                case (funct3)
+                case (funct3)   // 最后的I是指立即数
                     `INST_ADDI, `INST_SLTI, `INST_SLTIU, `INST_XORI, `INST_ORI, `INST_ANDI, `INST_SLLI, `INST_SRI: begin
                         reg_we_o = `WriteEnable;
                         reg_waddr_o = rd;
