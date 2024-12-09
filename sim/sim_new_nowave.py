@@ -9,7 +9,9 @@ import os
 def main():
     #print(sys.argv[0] + ' ' + sys.argv[1] + ' ' + sys.argv[2])
 
-    # 1.将bin文件转成mem文件
+    # 1.将bin文件转成mem文件 将c语言编译生成的bin文件转成mem文件
+    # inst.data就是bin文件转化成的mem文件 这个名字可以自定义,随便写
+    # mem文件中存放的就是32bit的指令
     cmd = r'python ../tools/BinToMem_CLI.py' + ' ' + sys.argv[1] + ' ' + sys.argv[2]
     f = os.popen(cmd)
     f.close()

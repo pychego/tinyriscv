@@ -168,11 +168,17 @@
 
 然后在这个CMD窗口下使用load_image命令将固件下载到FPGA，这里以freertos.bin文件为例，如下所示：
 
-`load_image D:/gitee/open/tinyriscv/tests/example/FreeRTOS/Demo/tinyriscv_GCC/freertos.bin 0x0 bin 0x0 0x1000000`
+`load_image D:/tinyriscv/tools/openocd/gpio.bin 0x0 bin 0x0 0x1000000`
+
+`load_image D:/tinyriscv/tools/openocd/uart_tx.bin 0x0 bin 0x0 0x1000000`
+
+
 
 使用verify_image命令来校验是否下载成功，如下所示：
 
-`verify_image D:/gitee/open/tinyriscv/tests/example/FreeRTOS/Demo/tinyriscv_GCC/freertos.bin 0x0`
+`verify_image D:/tinyriscv/tools/openocd/gpio.bin 0x0 bin 0x0`
+
+`verify_image D:/tinyriscv/tools/openocd/uart_tx.bin 0x0 bin 0x0`
 
 如果下载出错的话会有提示的，没有提示则说明下载成功。
 

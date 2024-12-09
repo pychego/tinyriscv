@@ -16,10 +16,10 @@
 
 // 数据发送端模块
 // 跨时钟域传输，全(四次)握手协议
-// req_o = 1
-// ack = 1
-// req_o = 0
-// ack = 0
+// req_o = 1 首先该模块发送req传输请求
+// ack = 1   rx接收到req请求之后，发送ack应答信号
+// req_o = 0 该模块接收到ack应答信号之后，发送req_o = 0，表示传输结束
+// ack = 0   rx接收到req_o = 0之后，发送ack = 0，表示接收结束
 module full_handshake_tx #(
     parameter DW = 32
 ) (  // TX要发送数据的位宽
