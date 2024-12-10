@@ -16,18 +16,19 @@
 
 `include "defines.v"
 
-// 通用寄存器模块
+/* 通用寄存器模块, 32个通用寄存器x0~x31, PC寄存器不在其中
+    regs模块接收id译码模块的rs1和rs2地址, 直接输出rs1和rs2的数据给id译码模块
+*/
+// 读寄存器1和读寄存器2的数据输出到译码模块id,没有
 module regs (
 
     input wire clk,
     input wire rst,
 
     // from ex(执行)
-    // RegAddrBus 4:0
-    // RegBus 31:0
     input wire               we_i,     // 写寄存器标志
-    input wire [`RegAddrBus] waddr_i,  // 写寄存器地址
-    input wire [    `RegBus] wdata_i,  // 写寄存器数据
+    input wire [`RegAddrBus] waddr_i,  // 写寄存器地址 RegAddrBus 4:0
+    input wire [    `RegBus] wdata_i,  // 写寄存器数据 RegBus 31:0
 
     // from jtag
     input wire               jtag_we_i,    // 写寄存器标志
@@ -51,10 +52,10 @@ module regs (
 
 );
 
+    // 32个通用寄存器  RegNum 32  RegBus 31:0
     reg [`RegBus] regs[0:`RegNum - 1];
 
-    // 写寄存器
-    // 为什么要判断地址是不是0,0地址不能写入数据吗
+    // 写通用寄存器, x0寄存器硬连线为0
     always @(posedge clk) begin
         if (rst == `RstDisable) begin
             // 优先ex模块写操作

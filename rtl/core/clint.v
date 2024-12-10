@@ -17,14 +17,13 @@
 `include "defines.v"
 
 
-// core local interruptor module
-// 核心中断管理、仲裁模块
+// core local interruptor module 核心中断管理、仲裁模块
 module clint (
 
     input wire clk,
     input wire rst,
 
-    // from core
+    // from if_id 将timer的中断信号打拍到这里
     input wire [`INT_BUS] int_flag_i,  // 中断输入信号 8bit
 
     // from id
@@ -40,11 +39,12 @@ module clint (
     input wire [`Hold_Flag_Bus] hold_flag_i,  // 流水线暂停标志
 
     // from csr_reg
-    input wire [`RegBus] data_i,      // CSR寄存器输入数据
-    input wire [`RegBus] csr_mtvec,   // mtvec寄存器 Machine Trap Vector
-    input wire [`RegBus] csr_mepc,    // mepc寄存器
-    input wire [`RegBus] csr_mstatus, // mstatus寄存器
+    input wire [`RegBus] data_i,  // CSR寄存器输入数据
+    input wire [`RegBus] csr_mtvec,   // mtvec寄存器 Machine Trap Vector 保存发生异常时处理器需要跳转到的地址
+    input wire [`RegBus] csr_mepc,  // mepc寄存器 Machine Exception PC 它指向发生异常的指令
+    input wire [`RegBus] csr_mstatus,  // mstatus寄存器
 
+    // from csr_reg
     input wire global_int_en_i,  // 全局中断使能标志
 
     // to ctrl
@@ -67,7 +67,7 @@ module clint (
     localparam S_INT_IDLE = 4'b0001;
     localparam S_INT_SYNC_ASSERT = 4'b0010;  // Synchronous Interrupt, 同步中断
     localparam S_INT_ASYNC_ASSERT = 4'b0100;  // Asynchronous Interrupt, 异步中断
-    localparam S_INT_MRET = 4'b1000;  // Machine Mode Return, 中断返回
+    localparam S_INT_MRET = 4'b1000;  // Machine Mode Exception Return, 机器模式中断返回
 
     // 写CSR寄存器状态定义
     // mstatus(Machine Status Register) 控制和反映处理器的全局状态
@@ -100,6 +100,7 @@ module clint (
                 end else begin
                     int_state = S_INT_IDLE;
                 end
+                // 异步中断  int_flag_i是timer产生的
             end else if (int_flag_i != `INT_NONE && global_int_en_i == `True) begin
                 int_state = S_INT_ASYNC_ASSERT;
             end else if (inst_i == `INST_MRET) begin  // 中断返回
@@ -122,9 +123,8 @@ module clint (
                     // 同步中断
                     if (int_state == S_INT_SYNC_ASSERT) begin
                         csr_state <= S_CSR_MEPC;
-                        // 在中断处理函数里会将中断返回地址加4
                         if (jump_flag_i == `JumpEnable) begin
-                            inst_addr <= jump_addr_i - 4'h4;  // ?
+                            inst_addr <= jump_addr_i - 4'h4;  // 在中断处理函数里会将中断返回地址加4
                         end else begin
                             inst_addr <= inst_addr_i;
                         end
@@ -227,12 +227,12 @@ module clint (
                 // 发出中断进入信号.写完mcause寄存器才能发
                 S_CSR_MCAUSE: begin
                     int_assert_o <= `INT_ASSERT;
-                    int_addr_o   <= csr_mtvec;
+                    int_addr_o   <= csr_mtvec;  // 异常处理函数地址
                 end
                 // 发出中断返回信号
                 S_CSR_MSTATUS_MRET: begin
                     int_assert_o <= `INT_ASSERT;
-                    int_addr_o   <= csr_mepc; // ??
+                    int_addr_o   <= csr_mepc;  // 中断返回地址
                 end
                 default: begin
                     int_assert_o <= `INT_DEASSERT;

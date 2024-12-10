@@ -57,7 +57,7 @@
 `define Hold_If   3'b010
 `define Hold_Id   3'b011
 
-// I type inst
+// I type inst  立即数类型
 `define INST_TYPE_I 7'b0010011
 `define INST_ADDI   3'b000
 `define INST_SLTI   3'b010
@@ -103,7 +103,7 @@
 `define INST_REM    3'b110
 `define INST_REMU   3'b111
 
-// J type inst  ???
+// J type inst  无条件跳转
 `define INST_JAL    7'b1101111
 `define INST_JALR   7'b1100111
 
@@ -118,7 +118,7 @@
 `define INST_ECALL  32'h73        // 这两个是?
 `define INST_EBREAK 32'h00100073
 
-// J type inst
+// B type inst
 `define INST_TYPE_B 7'b1100011
 `define INST_BEQ    3'b000
 `define INST_BNE    3'b001

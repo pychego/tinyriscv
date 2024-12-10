@@ -39,6 +39,9 @@ module rom (
         end
     end
 
+    /* 为什么取地址的指令要取31:2位，而不是31:0位？
+       因为pc_o即addr_i每次加4，所以addr_i[1:0]是00，addr_i[31:2]指示pc_o自加了几次
+    */
     always @(*) begin
         if (rst == `RstEnable) begin
             data_o = `ZeroWord;

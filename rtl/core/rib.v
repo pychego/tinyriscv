@@ -17,7 +17,7 @@
 `include "defines.v"
 
 
-// RIB总线模块 包含仲裁器和译码器
+// RIB总线模块 包含仲裁器和译码器, 组合逻辑,完全没有用到clk
 module rib (
 
     input wire clk,
@@ -203,6 +203,10 @@ module rib (
                 endcase
             end
             grant1: begin
+                /* Master1是tinyriscv的pc_reg和if_id模块 前者输出pc指针给rib,rib接收rom
+                存放的指令通过rib总线传递给if_id模块
+                 */
+
                 case (m1_addr_i[31:28])
                     slave_0: begin
                         s0_we_o   = m1_we_i;

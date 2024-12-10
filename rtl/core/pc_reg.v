@@ -16,18 +16,24 @@
 
 `include "defines.v"
 
-// PC寄存器模块
+// PC寄存器模块, PC寄存器是一个独立的寄存器, 不占用32个通用寄存器位置
+/*  作为Master1从AHB总线上取指
+*/
 module pc_reg (
 
     input wire clk,
     input wire rst,
 
+    // 下面三个输入来自ctrl模块
     input wire                  jump_flag_i,       // 跳转标志
     input wire [  `InstAddrBus] jump_addr_i,       // 跳转地址
     input wire [`Hold_Flag_Bus] hold_flag_i,       // 流水线暂停标志
+    // 来自jtag模块
     input wire                  jtag_reset_flag_i, // 复位标志
 
-    output reg [`InstAddrBus] pc_o  // PC指针
+    // pc_o 输出到if_id模块,同时作为tinyriscv的接口输出到AHB总线
+    output reg [`InstAddrBus] pc_o  // PC指针,32bit寄存器足够存放指令地址了
+    
 
 );
 
