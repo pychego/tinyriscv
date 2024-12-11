@@ -1,19 +1,3 @@
-/*                                                                      
- Copyright 2019 Blue Liang, liangkangnan@163.com
-                                                                         
- Licensed under the Apache License, Version 2.0 (the "License");         
- you may not use this file except in compliance with the License.        
- You may obtain a copy of the License at                                 
-                                                                         
-     http://www.apache.org/licenses/LICENSE-2.0                          
-                                                                         
- Unless required by applicable law or agreed to in writing, software    
- distributed under the License is distributed on an "AS IS" BASIS,       
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and     
- limitations under the License.                                          
- */
-
 `include "defines.v"
 
 // 除法模块
@@ -25,13 +9,14 @@ module div (
     input wire rst,
 
     // from ex
-    input wire [`RegBus] dividend_i,  // 被除数
+    input wire [`RegBus] dividend_i,  // 被除数, 原始数据都是补码形式
     input wire [`RegBus] divisor_i,  // 除数
-    input wire start_i,  // 开始信号，运算期间这个信号需要一直保持有效
+    input wire start_i,     // 开始信号，运算期间这个信号需要一直保持有效
     input wire [2:0] op_i,  // 具体是哪一条指令
     input wire [`RegAddrBus] reg_waddr_i,  // 运算结束后需要写的寄存器
 
     // to ex
+    // 看时序图确定ready_o和busy_o的时序
     output reg [    `RegBus] result_o,    // 除法结果，高32位是余数，低32位是商
     output reg               ready_o,     // 运算结束信号
     output reg               busy_o,      // 正在运算信号
@@ -45,21 +30,33 @@ module div (
     localparam STATE_CALC = 4'b0100;
     localparam STATE_END = 4'b1000;
 
-    reg [`RegBus] dividend_r;
-    reg [`RegBus] divisor_r;
+    reg [`RegBus] dividend_r;  // 被除数
+    reg [`RegBus] divisor_r;  // 除数   
     reg [2:0] op_r;
     reg [3:0] state;
     reg [31:0] count;
     reg [`RegBus] div_result;
     reg [`RegBus] div_remain;
-    reg [`RegBus] minuend;
+    reg [`RegBus] minuend;   // 被减数
     reg invert_result;
 
+    /* 1. div: x[rd] = x[rs1] ÷s x[rs2] 
+          用寄存器 x[rs1]的值除以寄存器 x[rs2]的值，向零舍入，将这些数视为二进制补码，把商写入x[rd]
+       2. divu: x[rd] = x[rs1] ÷u x[rs2]
+          用寄存器 x[rs1]的值除以寄存器 x[rs2]的值，向零舍入，将这些数视为无符号数，把商写入x[rd]
+       3. rem: x[rd] = x[rs1] %s x[rs2]
+          x[rs1]除以 x[rs2]，向 0 舍入，都视为 2 的补码，余数写入x[rd]
+       4. remu: x[rd] = x[rs1] %u x[rs2]
+          x[rs1]除以 x[rs2]，向 0 舍入，都视为无符号数，余数写入x[rd]
+    */
     wire op_div = (op_r == `INST_DIV);
     wire op_divu = (op_r == `INST_DIVU);
     wire op_rem = (op_r == `INST_REM);
     wire op_remu = (op_r == `INST_REMU);
 
+    /* 根据仿真, 如果reg [7:0] dividend_r = 8'b11110001,  补码形式的-15,那么
+       dividend_invert = -dividend_r = 8'b00001111, 15
+    */
     wire [31:0] dividend_invert = (-dividend_r);
     wire [31:0] divisor_invert = (-divisor_r);
     wire minuend_ge_divisor = (minuend >= divisor_r);
@@ -69,7 +66,7 @@ module div (
 
     // 状态机实现
     always @(posedge clk) begin
-        if (rst == `RstEnable) begin    // 注意rst是低电平有效,易错
+        if (rst == `RstEnable) begin  // 注意rst是低电平有效,易错
             state <= STATE_IDLE;
             ready_o <= `DivResultNotReady;
             result_o <= `ZeroWord;
@@ -108,9 +105,9 @@ module div (
                     if (start_i == `DivStart) begin
                         // 除数为0
                         if (divisor_r == `ZeroWord) begin
-                            if (op_div | op_divu) begin // 是除法
+                            if (op_div | op_divu) begin  // 是除法,则溢出
                                 result_o <= 32'hffffffff;
-                            end else begin      // 取余
+                            end else begin  // 取余
                                 result_o <= dividend_r;
                             end
                             ready_o <= `DivResultReady;
@@ -123,7 +120,6 @@ module div (
                             state <= STATE_CALC;
                             div_result <= `ZeroWord;
                             div_remain <= `ZeroWord;
-
                             // DIV和REM这两条指令是有符号数运算指令
                             if (op_div | op_rem) begin
                                 // 被除数求补码  reg修饰,如果是负数,仿真中也是补码形式存在
@@ -141,7 +137,6 @@ module div (
                             end else begin
                                 minuend <= dividend_r[31];
                             end
-
                             // 运算结束后是否要对结果取补码  符号不同就要取补码
                             if ((op_div && (dividend_r[31] ^ divisor_r[31] == 1'b1))
                                 || (op_rem && (dividend_r[31] == 1'b1))) begin
@@ -157,12 +152,16 @@ module div (
                         busy_o <= `False;
                     end
                 end
-
+    // wire[31:0] div_result_tmp = minuend_ge_divisor? ({div_result[30:0], 1'b1}): ({div_result[30:0], 1'b0});
+    // wire [31:0] minuend_tmp = minuend_ge_divisor ? minuend_sub_res[30:0] : minuend[30:0];
+                /* 试商法的关键都在这个STATE_CALC状态, 在此状态下考虑dividend_r,div_result,count,minuend
+                   count用来指示calc的周期, 从31到0, 逻辑右移
+                */
                 STATE_CALC: begin
                     if (start_i == `DivStart) begin
-                        dividend_r <= {dividend_r[30:0], 1'b0};
+                        dividend_r <= {dividend_r[30:0], 1'b0};     // 逻辑左移
                         div_result <= div_result_tmp;
-                        count <= {1'b0, count[31:1]};
+                        count <= {1'b0, count[31:1]};  // 逻辑右移
                         if (|count) begin
                             minuend <= {minuend_tmp[30:0], dividend_r[30]};
                         end else begin

@@ -41,7 +41,7 @@ module id (
     output reg [`RegAddrBus] reg2_raddr_o,  // 读通用寄存器2地址, 实时得到reg2_rdata_i
 
     // to csr reg
-    output reg [`MemAddrBus] csr_raddr_o,  // 读CSR寄存器地址
+    output reg [`MemAddrBus] csr_raddr_o,  // 读CSR寄存器地址, 根据inst生成的
 
     // to ex
     output reg [`MemAddrBus] op1_o,  // 操作数1
@@ -55,7 +55,7 @@ module id (
     output reg reg_we_o,  // 写通用寄存器标志
     output reg [`RegAddrBus] reg_waddr_o,  // 写通用寄存器地址
     output reg csr_we_o,  // 写CSR寄存器标志, 送到id_ex模块
-    output reg [`RegBus] csr_rdata_o,  // CSR寄存器数据, 送到id_ex模块
+    output reg [`RegBus] csr_rdata_o,     // CSR寄存器数据, 送到id_ex模块
     output reg [`MemAddrBus] csr_waddr_o  // 写CSR寄存器地址, 送到id_ex模块
 
 );
@@ -130,6 +130,9 @@ module id (
                             op1_o = reg1_rdata_i;
                             op2_o = reg2_rdata_i;
                         end
+                        /* 通过进行isa的div测试, clk0, pc=0x10时是div指令,clk1,pc=0x14,此时id译码div指令,
+                        clk2到来,此时ex执行div指令,发出start信号和跳转信号,跳转地址为ex中的inst_i(落后于pc_o两个clk) + 4,即为0x14
+                        */
                         `INST_DIV, `INST_DIVU, `INST_REM, `INST_REMU: begin
                             reg_we_o = `WriteDisable;
                             reg_waddr_o = rd;
@@ -200,7 +203,7 @@ module id (
                         op1_o = reg1_rdata_i;
                         op2_o = reg2_rdata_i;
                         // 这里只是把ex.v中的跳转地址进行提前计算了  lyb
-                        op1_jump_o = inst_addr_i; // pc_o
+                        op1_jump_o = inst_addr_i; // 当前的pc指针, pc_o
                         op2_jump_o = {
                             {20{inst_i[31]}}, inst_i[7], inst_i[30:25], inst_i[11:8], 1'b0
                         };

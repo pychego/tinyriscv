@@ -35,7 +35,7 @@ module clint (
     input wire [`InstAddrBus] jump_addr_i,
     input wire                div_started_i,
 
-    // from ctrl
+    // from ctrl  整体的流水线暂停标志
     input wire [`Hold_Flag_Bus] hold_flag_i,  // 流水线暂停标志
 
     // from csr_reg
@@ -53,7 +53,7 @@ module clint (
     // to csr_reg
     output reg               we_o,     // 写CSR寄存器标志
     output reg [`MemAddrBus] waddr_o,  // 写CSR寄存器地址
-    output reg [`MemAddrBus] raddr_o,  // 读CSR寄存器地址
+    output reg [`MemAddrBus] raddr_o,  // 读CSR寄存器地址, 这个没用到 
     output reg [    `RegBus] data_o,   // 写CSR寄存器数据
 
     // to ex

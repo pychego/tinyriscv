@@ -25,7 +25,7 @@ module ctrl (
     // from ex
     input wire                jump_flag_i,
     input wire [`InstAddrBus] jump_addr_i,
-    input wire                hold_flag_ex_i,
+    input wire                hold_flag_ex_i,   // 除法运算暂停标志
 
     // from rib
     input wire hold_flag_rib_i,
@@ -34,8 +34,9 @@ module ctrl (
     input wire jtag_halt_flag_i,
 
     // from clint
-    input wire hold_flag_clint_i,
+    input wire hold_flag_clint_i,       // 中断暂停标志
 
+    // to pc_reg, if_id, id_ex, clint, 实际上clint中的该信号没使用
     output reg [`Hold_Flag_Bus] hold_flag_o,
 
     // to pc_reg  直接将从ex接收的信号转发
