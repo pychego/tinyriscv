@@ -1,17 +1,4 @@
-/*                                                                      
- Copyright 2020 Blue Liang, liangkangnan@163.com
-                                                                         
- Licensed under the Apache License, Version 2.0 (the "License");         
- you may not use this file except in compliance with the License.        
- You may obtain a copy of the License at                                 
-                                                                         
-     http://www.apache.org/licenses/LICENSE-2.0                          
-                                                                         
- Unless required by applicable law or agreed to in writing, software    
- distributed under the License is distributed on an "AS IS" BASIS,       
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and     
- limitations under the License.                                          
+/*                                                                                                             
  */
 
 `define DM_RESP_VALID 1'b1
@@ -59,8 +46,8 @@ module jtag_dm #(
 
 );
 
-    parameter DM_RESP_BITS = DMI_ADDR_BITS + DMI_DATA_BITS + DMI_OP_BITS;
-    parameter DTM_REQ_BITS = DMI_ADDR_BITS + DMI_DATA_BITS + DMI_OP_BITS;
+    parameter DM_RESP_BITS = DMI_ADDR_BITS + DMI_DATA_BITS + DMI_OP_BITS;  // 40
+    parameter DTM_REQ_BITS = DMI_ADDR_BITS + DMI_DATA_BITS + DMI_OP_BITS;  // 40
     parameter SHIFT_REG_BITS = DTM_REQ_BITS;
 
     // 输入输出信号
@@ -71,24 +58,31 @@ module jtag_dm #(
     input wire dtm_req_valid_i;
     input wire [DTM_REQ_BITS-1:0] dtm_req_data_i;
     // tx
-    input wire dtm_ack_i;
-    output wire [DM_RESP_BITS-1:0] dm_resp_data_o;
-    output wire dm_resp_valid_o;
+    input wire dtm_ack_i;  // 来自jtag_driver
+    output wire [DM_RESP_BITS-1:0] dm_resp_data_o;  // 发送给jtag_driver
+    output wire dm_resp_valid_o;  // 发送给jtag_driver
 
+    // 与regs模块交互
     output wire dm_reg_we_o;
     output wire [4:0] dm_reg_addr_o;
     output wire [31:0] dm_reg_wdata_o;
     input wire [31:0] dm_reg_rdata_i;
+
+    // 作为Master0通过AHB总线与内存交互
     output wire dm_mem_we_o;
     output wire [31:0] dm_mem_addr_o;
     output wire [31:0] dm_mem_wdata_o;
     input wire [31:0] dm_mem_rdata_i;
-
     output wire dm_op_req_o;
+
+    /* dm_halt_req_o: halt请求 可以暂停CPU;, 一方面作为soc的输出指示halt CPU, 另一方面
+     * 作为tinyriscv的输入, 输入到ctrl接口, 暂停整条流水线
+     * dm_reset_req_o: 输入到pc_reg, 复位pc指针
+    */
     output wire dm_halt_req_o;
     output wire dm_reset_req_o;
 
-    // DM模块寄存器
+    // DM模块寄存器, 在作者的gitee仓库都能找到定义
     reg [31:0] dcsr;
     reg [31:0] dmstatus;
     reg [31:0] dmcontrol;
@@ -346,5 +340,8 @@ module jtag_dm #(
         .recv_data_o(rx_data),
         .recv_rdy_o (rx_valid)
     );
+    /*  jtag_dm的rx模块接收到jtag_driver的req信号并打拍之后, rx_valid有一个高脉冲,此时need_resp也有一个高脉冲
+     *  从而使得jtag_dm的tx模块发送dm_resp_data数据给jtag_driver
+    */
 
 endmodule

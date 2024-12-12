@@ -31,10 +31,13 @@ module jtag_top #(
     input  wire jtag_pin_TDI,
     output wire jtag_pin_TDO,
 
+    // 与regs模块交互
     output wire        reg_we_o,
     output wire [ 4:0] reg_addr_o,
     output wire [31:0] reg_wdata_o,
     input  wire [31:0] reg_rdata_i,
+
+    // 通过AHB总线与内存交互
     output wire        mem_we_o,
     output wire [31:0] mem_addr_o,
     output wire [31:0] mem_wdata_o,
@@ -62,6 +65,8 @@ module jtag_top #(
     wire                      dm_halt_req_o;
     wire                      dm_reset_req_o;
 
+    /* 注意, jtag_driver的时钟是jtag_TCK, jtag_dm的时钟是clk
+    */
     jtag_driver #(
         .DMI_ADDR_BITS(DMI_ADDR_BITS),
         .DMI_DATA_BITS(DMI_DATA_BITS),

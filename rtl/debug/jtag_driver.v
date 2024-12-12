@@ -1,17 +1,6 @@
 /*                                                                      
- Copyright 2020 Blue Liang, liangkangnan@163.com
-                                                                         
- Licensed under the Apache License, Version 2.0 (the "License");         
- you may not use this file except in compliance with the License.        
- You may obtain a copy of the License at                                 
-                                                                         
-     http://www.apache.org/licenses/LICENSE-2.0                          
-                                                                         
- Unless required by applicable law or agreed to in writing, software    
- distributed under the License is distributed on an "AS IS" BASIS,       
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and     
- limitations under the License.                                          
+    与作者的gitee上面的deep_in_riscv_debug项目的readme文件对照理解
+    该代码是riscv调试系统框架中的DTM(Debug Transport Module)模块, 实现了TAP状态机                                        
  */
 
 `define DM_RESP_VALID 1'b1
@@ -52,9 +41,9 @@ module jtag_driver #(
     parameter DTM_VERSION = 4'h1;
     parameter IR_BITS = 5;
 
-    parameter DM_RESP_BITS = DMI_ADDR_BITS + DMI_DATA_BITS + DMI_OP_BITS;
-    parameter DTM_REQ_BITS = DMI_ADDR_BITS + DMI_DATA_BITS + DMI_OP_BITS;
-    parameter SHIFT_REG_BITS = DTM_REQ_BITS;
+    parameter DM_RESP_BITS = DMI_ADDR_BITS + DMI_DATA_BITS + DMI_OP_BITS;  // 40
+    parameter DTM_REQ_BITS = DMI_ADDR_BITS + DMI_DATA_BITS + DMI_OP_BITS;  // 40
+    parameter SHIFT_REG_BITS = DTM_REQ_BITS;  // 40
 
     // input and output
     input wire rst_n;
@@ -62,6 +51,8 @@ module jtag_driver #(
     input wire jtag_TDI;
     input wire jtag_TMS;
     output reg jtag_TDO;
+
+    // 与DM模块交互
     input wire dm_resp_i;
     input wire [DM_RESP_BITS - 1:0] dm_resp_data_i;
     output wire dtm_ack_o;
@@ -87,7 +78,9 @@ module jtag_driver #(
     parameter EXIT2_IR = 4'hE;
     parameter UPDATE_IR = 4'hF;
 
-    // DTM regs
+    /* DTM regs DMT中必须实现的寄存器
+       后面的值是当IR(instruction register)寄存器的值是这个的话,对应选择的DR(data register)寄存器
+     */
     parameter REG_BYPASS = 5'b11111;
     parameter REG_IDCODE = 5'b00001;
     parameter REG_DMI = 5'b10001;
@@ -124,11 +117,13 @@ module jtag_driver #(
         1'b0,  // dmireset
         1'b0,
         3'h5,  // idle
-        dmi_stat,  // dmistat
-        addr_bits,  // abits
-        DTM_VERSION
+        dmi_stat,   // dmistat,只读,上一次操作的状态,0表示无出错,1或者2表示出错,3表示操作还未完成
+        addr_bits,  // abits 只读，dmi寄存器中address域的大小(位数)
+        DTM_VERSION // 只读，实现所对应的spec版本，0表示0.11版本，1表示0.13版本
     };  // version
 
+
+    // 往DM模块发送busy_response和none_busy_response
     assign busy_response = {
         {(DMI_ADDR_BITS + DMI_DATA_BITS) {1'b0}}, {(DMI_OP_BITS) {1'b1}}
     };  // op = 2'b11
@@ -162,7 +157,7 @@ module jtag_driver #(
         end
     end
 
-    // IR or DR shift
+    // IR or DR shift 看不懂
     always @(posedge jtag_TCK) begin
         case (jtag_state)
             // IR
@@ -171,9 +166,9 @@ module jtag_driver #(
             SHIFT_IR:
             shift_reg <= {
                 {(SHIFT_REG_BITS - IR_BITS) {1'b0}}, jtag_TDI, shift_reg[IR_BITS-1:1]
-            };  // right shift 1 bit  右移1bit
+            };  // right shift 1 bit  右移1bit 将jtag_TDI放入高位
             // DR
-            CAPTURE_DR:
+            CAPTURE_DR:     // 捕获数据寄存器(DR)状态
             case (ir_reg)
                 REG_BYPASS: shift_reg <= {(SHIFT_REG_BITS) {1'b0}};
                 REG_IDCODE: shift_reg <= {{(SHIFT_REG_BITS - DMI_DATA_BITS) {1'b0}}, idcode};
@@ -181,7 +176,7 @@ module jtag_driver #(
                 REG_DMI:    shift_reg <= is_busy ? busy_response : none_busy_response;
                 default:    shift_reg <= {(SHIFT_REG_BITS) {1'b0}};
             endcase
-            SHIFT_DR:
+            SHIFT_DR:       // 移位数据寄存器(DR)状态
             case (ir_reg)
                 REG_BYPASS: shift_reg <= {{(SHIFT_REG_BITS - 1) {1'b0}}, jtag_TDI};  // in = out
                 REG_IDCODE:
@@ -222,7 +217,7 @@ module jtag_driver #(
     assign tx_valid = dtm_req_valid;
     assign tx_data  = dtm_req_data;
 
-    // DTM reset
+    // DTM reset  看不懂
     always @(posedge jtag_TCK or negedge rst_n) begin
         if (!rst_n) begin
             sticky_busy <= 1'b0;
@@ -288,12 +283,12 @@ module jtag_driver #(
     ) tx (
         .clk       (jtag_TCK),
         .rst_n     (rst_n),
-        .ack_i     (dm_ack_i),
-        .req_i     (tx_valid),
-        .req_data_i(tx_data),
-        .idle_o    (tx_idle),
-        .req_o     (dtm_req_valid_o),
-        .req_data_o(dtm_req_data_o)
+        .ack_i     (dm_ack_i),  // RX端应答信号,收到之后为第三次握手
+        .req_i     (tx_valid),  // 来自其他tx模块发送的信号, 这里其实就是本模块生成的数据想要进行传输
+        .req_data_i(tx_data),   // 同上
+        .idle_o    (tx_idle),   // TX端是否空闲信号，空闲才能发数据
+        .req_o     (dtm_req_valid_o),  // TX端请求信号, 第一次握手发出
+        .req_data_o(dtm_req_data_o)    // TX端要发送的数据, 第一次握手发出
     );
 
     full_handshake_rx #(
@@ -301,9 +296,9 @@ module jtag_driver #(
     ) rx (
         .clk        (jtag_TCK),
         .rst_n      (rst_n),
-        .req_i      (dm_resp_i),
+        .req_i      (dm_resp_i),    // rx接受tx的req信号
         .req_data_i (dm_resp_data_i),
-        .ack_o      (dtm_ack_o),
+        .ack_o      (dtm_ack_o),   // 接收到req信号后,发送ack信号
         .recv_data_o(rx_data),
         .recv_rdy_o (rx_valid)
     );

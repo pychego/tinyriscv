@@ -35,13 +35,13 @@ module regs (
     input wire [`RegAddrBus] jtag_addr_i,  // 读、写寄存器地址
     input wire [    `RegBus] jtag_data_i,  // 写寄存器数据
 
-    // from id(译码)
+    // from id(译码)  rs1
     input wire [`RegAddrBus] raddr1_i,  // 读寄存器1地址
 
     // to id
     output reg [`RegBus] rdata1_o,  // 读寄存器1数据
 
-    // from id
+    // from id  rs2
     input wire [`RegAddrBus] raddr2_i,  // 读寄存器2地址
 
     // to id
