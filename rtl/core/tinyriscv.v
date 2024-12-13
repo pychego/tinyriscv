@@ -38,7 +38,7 @@ module tinyriscv (
     input  wire               jtag_reg_we_i,    // jtag模块写寄存器标志
     output wire [    `RegBus] jtag_reg_data_o,  // jtag模块读取到的寄存器数据
 
-    input wire rib_hold_flag_i,   // 总线暂停标志
+    input wire rib_hold_flag_i,   // 总线发出的流水线暂停标志
     input wire jtag_halt_flag_i,  // jtag暂停标志
     input wire jtag_reset_flag_i, // jtag复位PC标志
 

@@ -17,7 +17,10 @@
 `include "defines.v"
 
 
-// RIB总线模块 包含仲裁器和译码器, 组合逻辑,完全没有用到clk
+/*
+   该项目没用使用AMBA总线, 不是AHB总线, 而是自主设计了一种名为RIB(RISC-V Internal Bus)总线
+   RIB总线支持多主多从连接, 但是同一时刻只支持一主一从通信,RIB总线上的哥哥主设备之间采用固定优先级仲裁机制
+*/
 module rib (
 
     input wire clk,
@@ -94,6 +97,9 @@ module rib (
 
     // 访问地址(m_addr_i)的最高4位决定要访问的是哪一个从设备
     // 因此最多支持16个从设备
+    /* 根据作者规定, tinyriscv目前外挂了6个外设，每个外设的空间大小为256MB, 是体现在这里的
+       地址分配体现在这里, 从设备0的地址空间为0x0000_0000 ~ 0x0FFF_FFFF
+    */
     parameter [3:0] slave_0 = 4'b0000;
     parameter [3:0] slave_1 = 4'b0001;
     parameter [3:0] slave_2 = 4'b0010;
@@ -116,6 +122,9 @@ module rib (
     // 仲裁逻辑
     // 固定优先级仲裁机制
     // 优先级由高到低：主设备3，主设备0，主设备2，主设备1
+    /* 顺序一次为uart串口模块, ex模块, jtag_top模块, pc_reg模块
+       其中除了pc_reg外其他主设备访问总线都需要流水线停顿
+    */
     always @(*) begin
         if (req[3]) begin
             grant = grant3;

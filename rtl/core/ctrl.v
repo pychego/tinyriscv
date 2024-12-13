@@ -27,8 +27,8 @@ module ctrl (
     input wire [`InstAddrBus] jump_addr_i,
     input wire                hold_flag_ex_i,   // 除法运算暂停标志
 
-    // from rib
-    input wire hold_flag_rib_i,
+    // from rib  总线发出的流水席暂停信号
+    input wire hold_flag_rib_i, 
 
     // from jtag
     input wire jtag_halt_flag_i,
@@ -56,7 +56,7 @@ module ctrl (
             // 暂停整条流水线
             hold_flag_o = `Hold_Id;
         end else if (hold_flag_rib_i == `HoldEnable) begin
-            // 暂停PC，即取指地址不变
+            // 暂停PC，即取指地址不变, 此时if_id和ex模块不受影响,继续执行
             hold_flag_o = `Hold_Pc;
         end else if (jtag_halt_flag_i == `HoldEnable) begin
             // 暂停整条流水线

@@ -43,7 +43,7 @@ module ex (
     input wire                int_assert_i,  // 中断发生标志
     input wire [`InstAddrBus] int_addr_i,    // 中断跳转地址
 
-    // from mem, ex作为AHB的Master0, 从mem读取数据
+    // from mem, ex作为RIB的Master0, 从mem读取数据
     input wire [`MemBus] mem_rdata_i,  // 内存输入数据
 
     // from div
@@ -53,7 +53,7 @@ module ex (
     input wire [`RegAddrBus] div_reg_waddr_i, // 除法运算结束后要写的寄存器地址
 
     // to mem
-    /* 当与AHB总线连接时, 会根据we信号选择addr是mem_raddr_o
+    /* 当与RIB总线连接时, 会根据we信号选择addr是mem_raddr_o
     */
     output reg  [    `MemBus] mem_wdata_o,  // 写内存数据
     output reg  [`MemAddrBus] mem_raddr_o,  // 读内存地址
@@ -260,8 +260,8 @@ module ex (
                 div_waddr = `ZeroWord;
                 div_hold_flag = `HoldEnable;
             end else begin
-                div_start = `DivStop;
-                div_hold_flag = `HoldDisable;       // 除法运算结束,恢复流水线
+                div_start     = `DivStop;
+                div_hold_flag = `HoldDisable;  // 除法运算结束,恢复流水线
                 /* ox10为div指令的地址pc_o
                 除法开始...
                    clk0到来, pc_o为0x10, 译码id为0x0C, ex执行0x08
@@ -807,7 +807,7 @@ module ex (
                         jump_flag = (~op1_ge_op2_unsigned) & `JumpEnable;
                         jump_addr = {32{(~op1_ge_op2_unsigned)}} & op1_jump_add_op2_jump_res;
                     end
-                       3// 无符号大于等于时分支 (Branch if Greater Than or Equal, Unsigned)
+                    // 无符号大于等于时分支 (Branch if Greater Than or Equal, Unsigned)
                     `INST_BGEU: begin  // if (rs1 ≥u rs2) pc += sext(offset)
                         hold_flag = `HoldDisable;
                         mem_wdata_o = `ZeroWord;
