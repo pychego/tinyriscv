@@ -78,7 +78,7 @@ module ex (
     output reg  [        2:0] div_op_o,        // 具体是哪一条除法指令
     output reg  [`RegAddrBus] div_reg_waddr_o, // 除法运算结束后要写的寄存器地址
 
-    // to ctrl
+    // to ctrl 和 clint  timer中断主要是送入clint模块, div中断主要是送入ctrl模块
     output wire                hold_flag_o,  // 是否暂停标志
     output wire                jump_flag_o,  // 是否跳转标志
     output wire [`InstAddrBus] jump_addr_o   // 跳转目的地址
@@ -266,7 +266,7 @@ module ex (
                 除法开始...
                    clk0到来, pc_o为0x10, 译码id为0x0C, ex执行0x08
                    clk1到来, pc_o为0x14, 译码id为0x10,译出div指令, ex执行0x0C
-                   clk2到来, pc_o为0x18, 译码id为0x14, ex执行0x10,输出流水线暂停指令, 并输出跳转使能和跳转地址
+                   clk2到来, pc_o为0x18, 译码id为0x14, ex执行0x10,输出流水线暂停指令给ctrl, 并输出跳转使能和跳转地址
                    clk3的到来,pc_o根据跳转地址跳转到0x10 + 0x04 = 0x14, 译码停止, ex停止
                 除法结束...
                    clk0到来,除法结束,这个周期pc_o还是0x14,但是译码id空档,ex执行空档
@@ -807,7 +807,7 @@ module ex (
                         jump_flag = (~op1_ge_op2_unsigned) & `JumpEnable;
                         jump_addr = {32{(~op1_ge_op2_unsigned)}} & op1_jump_add_op2_jump_res;
                     end
-                    // 无符号大于等于时分支 (Branch if Greater Than or Equal, Unsigned)
+                       3// 无符号大于等于时分支 (Branch if Greater Than or Equal, Unsigned)
                     `INST_BGEU: begin  // if (rs1 ≥u rs2) pc += sext(offset)
                         hold_flag = `HoldDisable;
                         mem_wdata_o = `ZeroWord;

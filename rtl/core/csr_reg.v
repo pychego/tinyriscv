@@ -10,7 +10,7 @@ module csr_reg (
     input wire clk,
     input wire rst,
 
-    // form ex 或者 id
+    // from ex 或者 id
     input wire               we_i,     // ex模块写寄存器标志
     input wire [`MemAddrBus] raddr_i,  // id模块读寄存器地址
     input wire [`MemAddrBus] waddr_i,  // ex模块写寄存器地址
@@ -38,7 +38,7 @@ module csr_reg (
 
     /* mtvec Machine Trap Vector 它保存发生异常时处理器需要跳转到的地址
        mcause Machine Cause 它指示发生异常的种类
-       mepc Machine Exception Program Counter 它指向发生异常的指令
+       mepc Machine Exception Program Counter 它指向发生异常前执行的指令
        mie Machine Interrupt Enable 它指出处理器目前能处理和必须忽略的中断
        mstatus Machine Status 它保存全局中断使能，以及许多其他的状态
        mscratch Machine Scratch 它暂时存放一个字大小的数据

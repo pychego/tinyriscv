@@ -1,3 +1,5 @@
+# 2024.12.12  作者: lyb  在axz7010上的约束文件, 验证过了没有问题
+
 #  已经根据xz7010的引脚分配修改 主要是uart_debug_pin, 这个接到一个空引脚, 
 #  在使用jtag下载时,将该空引脚接地, 串口下载时,将该空引脚接到3.3V,不能使用拨码开关
 
@@ -21,11 +23,11 @@ set_property PACKAGE_PIN G17 [get_ports over]
 set_property IOSTANDARD LVCMOS33 [get_ports succ]
 set_property PACKAGE_PIN G19 [get_ports succ]
  
-# CPU停住指示引脚 ok   LED2  G20
+# CPU停住指示引脚 ok   LED2  G20  halt之后led熄灭
 set_property IOSTANDARD LVCMOS33 [get_ports halted_ind]
 set_property PACKAGE_PIN G20 [get_ports halted_ind]
 
-# 串口下载使能引脚  ok    KEY0   H20  使用接地 N16引脚
+# 串口下载使能引脚  ok    KEY0是H20  使用接地 N16引脚
 set_property IOSTANDARD LVCMOS33 [get_ports uart_debug_pin]
 set_property PACKAGE_PIN N16 [get_ports uart_debug_pin]
 

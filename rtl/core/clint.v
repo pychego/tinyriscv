@@ -40,8 +40,8 @@ module clint (
 
     // from csr_reg
     input wire [`RegBus] data_i,  // CSR寄存器输入数据
-    input wire [`RegBus] csr_mtvec,   // mtvec寄存器 Machine Trap Vector 保存发生异常时处理器需要跳转到的地址
-    input wire [`RegBus] csr_mepc,  // mepc寄存器 Machine Exception PC 它指向发生异常的指令
+    input wire [`RegBus] csr_mtvec,    // mtvec寄存器 Machine Trap Vector 保存发生异常时处理器需要跳转到的地址
+    input wire [`RegBus] csr_mepc,     // mepc寄存器 Machine Exception PC 它指向发生异常的指令
     input wire [`RegBus] csr_mstatus,  // mstatus寄存器
 
     // from csr_reg
@@ -144,7 +144,10 @@ module clint (
                         // 定时器中断
                         cause <= 32'h80000004;
                         csr_state <= S_CSR_MEPC;
-                        if (jump_flag_i == `JumpEnable) begin
+                        /*  看timer_int.c在tinyriscv上的仿真波形可以知道, 来了timer_int信号zhihou,过了5个周期才会
+                            有来自ex的jump_flag_i == `JumpEnable, 所以timer的中断满足不了jump条件, 所以inst_addr <= inst_addr_i;
+                        */
+                        if (jump_flag_i == `JumpEnable) begin  // 这里不太懂
                             inst_addr <= jump_addr_i;
                             // 异步中断可以中断除法指令的执行，中断处理完再重新执行除法指令
                         end else if (div_started_i == `DivStart) begin

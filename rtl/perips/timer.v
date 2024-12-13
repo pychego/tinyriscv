@@ -1,17 +1,4 @@
-/*                                                                      
- Copyright 2020 Blue Liang, liangkangnan@163.com
-                                                                         
- Licensed under the Apache License, Version 2.0 (the "License");         
- you may not use this file except in compliance with the License.        
- You may obtain a copy of the License at                                 
-                                                                         
-     http://www.apache.org/licenses/LICENSE-2.0                          
-                                                                         
- Unless required by applicable law or agreed to in writing, software    
- distributed under the License is distributed on an "AS IS" BASIS,       
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and     
- limitations under the License.                                          
+/*                                                                                                               
  */
 
 `include "../core/defines.v"
@@ -31,6 +18,10 @@ module timer (
     output wire        int_sig_o  // 给出中断信号
 
 );
+/* timer产生的异步中断信号传递方向:
+   timer -> tinyriscv(if_id) 打拍 -> clint(进入int_state == S_INT_ASYNC_ASSERT,)  要根据timer_int.c的仿真波形进行分析,超级复杂
+   
+*/
 
     localparam REG_CTRL = 4'h0;
     localparam REG_COUNT = 4'h4;
