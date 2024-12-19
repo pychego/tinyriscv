@@ -15,10 +15,12 @@
   else \
     asm volatile ("csrw " #reg ", %0" :: "r"(val)); })
 
-
+// asm 是一个关键字,用于在C代买中嵌入汇编语言代码, 允许程序员直接在C代码中编写汇编指令
+/*  通过读取s11_x27寄存器的值来判断测试是否通过, 0表示测试失败, 1表示测试通过
+*/
 #ifdef SIMULATION
-#define set_test_pass() asm("li x27, 0x01")
-#define set_test_fail() asm("li x27, 0x00")
+#define set_test_pass() asm("li x27, 0x01")   // 将s11_x27寄存器的值设置为1
+#define set_test_fail() asm("li x27, 0x00")   // 将s11_x27寄存器的值设置为0
 #endif
 
 
