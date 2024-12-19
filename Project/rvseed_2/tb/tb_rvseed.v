@@ -29,7 +29,7 @@ module tb_rvseed ();
     wire [`CPU_WIDTH-1:0] curr_pc;
     wire [`CPU_WIDTH-1:0] inst;
 
-
+    // `SIM_PERIOD = 20ns 时钟周期
     initial begin
         #(`SIM_PERIOD / 2);
         clk       = 1'b0;
@@ -39,7 +39,7 @@ module tb_rvseed ();
         zero      = 1'b1;
         jump      = 1'b0;
         imm       = `CPU_WIDTH'h8;
-        inst_name = "ADD";
+        inst_name = "ADD";     // 指令文件名
         inst_load(inst_name);
 
         #(`SIM_PERIOD * 1);
@@ -105,7 +105,7 @@ module tb_rvseed ();
         .next_pc(next_pc)
     );
 
-    // iverilog 
+    // iverilog   生成仿真波形文件
     initial begin
         $dumpfile("sim_out.vcd");
         $dumpvars;
