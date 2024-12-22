@@ -131,7 +131,7 @@ module id (
                             op2_o = reg2_rdata_i;
                         end
                         /* 通过进行isa的div测试, clk0, pc=0x10时是div指令,clk1,pc=0x14,此时id译码div指令,
-                        clk2到来,此时ex执行div指令,发出start信号和跳转信号,跳转地址为ex中的inst_i(落后于pc_o两个clk) + 4,即为0x14
+                        clk2到来,此时ex执行div指令,发出div_start信号和跳转信号,跳转地址为ex中的inst_i(落后于pc_o两个clk) + 4,即为0x14
                         */
                         `INST_DIV, `INST_DIVU, `INST_REM, `INST_REMU: begin
                             reg_we_o = `WriteDisable;

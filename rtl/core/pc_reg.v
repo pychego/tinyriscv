@@ -1,22 +1,6 @@
-/*                                                                      
- Copyright 2019 Blue Liang, liangkangnan@163.com
-                                                                         
- Licensed under the Apache License, Version 2.0 (the "License");         
- you may not use this file except in compliance with the License.        
- You may obtain a copy of the License at                                 
-                                                                         
-     http://www.apache.org/licenses/LICENSE-2.0                          
-                                                                         
- Unless required by applicable law or agreed to in writing, software    
- distributed under the License is distributed on an "AS IS" BASIS,       
- WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- See the License for the specific language governing permissions and     
- limitations under the License.                                          
- */
-
 `include "defines.v"
 
-// PC寄存器模块, PC寄存器是一个独立的寄存器, 不占用32个通用寄存器位置
+//  PC寄存器模块, PC寄存器是一个独立的寄存器, 不占用32个通用寄存器位置
 /*  作为Master1从AHB总线上取指
 */
 module pc_reg (
@@ -25,6 +9,8 @@ module pc_reg (
     input wire rst,
 
     // 下面三个输入来自ctrl模块
+    /* 优先级: jump > hold_flag > pc_o + 4
+    */
     input wire                  jump_flag_i,       // 跳转标志
     input wire [  `InstAddrBus] jump_addr_i,       // 跳转地址
     input wire [`Hold_Flag_Bus] hold_flag_i,       // 流水线暂停标志
