@@ -27,14 +27,14 @@ module ctrl (
     input wire [`InstAddrBus] jump_addr_i,
     input wire                hold_flag_ex_i,   // 除法运算暂停标志
 
-    // from rib  总线发出的流水席暂停信号
+    // from rib  总线发出的流水线暂停信号
     input wire hold_flag_rib_i, 
 
     // from jtag
     input wire jtag_halt_flag_i,
 
     // from clint
-    input wire hold_flag_clint_i,       // 中断暂停标志
+    input wire hold_flag_clint_i,       // 中断暂停标志(async和sync)
 
     // to pc_reg, if_id, id_ex, clint, 实际上clint中的该信号没使用
     output reg [`Hold_Flag_Bus] hold_flag_o,
@@ -52,11 +52,13 @@ module ctrl (
         // 默认不暂停
         hold_flag_o = `Hold_None;
         // 按优先级处理不同模块的请求
+        /* 对于跳转指令, div暂停, 同步中断这几个, ex执行发出跳转之后, 下一拍clk就直接pc跳转了
+        */
         if (jump_flag_i == `JumpEnable || hold_flag_ex_i == `HoldEnable || hold_flag_clint_i == `HoldEnable) begin
-            // 暂停整条流水线
+            // 对于跳转操作、来自ex阶段的暂停(div)、来自中断模块(同步中断ecall, ebreak, timer)的暂停则暂停整条流水线。
             hold_flag_o = `Hold_Id;
         end else if (hold_flag_rib_i == `HoldEnable) begin
-            // 暂停PC，即取指地址不变, 此时if_id和ex模块不受影响,继续执行
+            // 对于总线暂停，只需要暂停PC寄存器，让译码和执行阶段继续运行。
             hold_flag_o = `Hold_Pc;
         end else if (jtag_halt_flag_i == `HoldEnable) begin
             // 暂停整条流水线

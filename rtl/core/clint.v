@@ -24,22 +24,22 @@ module clint (
     input wire rst,
 
     // from if_id 将timer的中断信号打拍到这里
-    input wire [`INT_BUS] int_flag_i,  // 中断输入信号 8bit
+    input wire [`INT_BUS] int_flag_i,  // 中断输入信号 8bit 定时器timer中断输入
 
     // from id
     input wire [    `InstBus] inst_i,      // 指令内容 32bit
     input wire [`InstAddrBus] inst_addr_i, // 指令地址 32bit
 
     // from ex
-    input wire                jump_flag_i,
+    input wire jump_flag_i,     // 这两个信号和中断有什么关系
     input wire [`InstAddrBus] jump_addr_i,
-    input wire                div_started_i,
+    input wire                div_started_i,  // 除法开始标志,(在执行除法操作时为1,程序不能响应同步中断)
 
     // from ctrl  整体的流水线暂停标志
-    input wire [`Hold_Flag_Bus] hold_flag_i,  // 流水线暂停标志
+    input wire [`Hold_Flag_Bus] hold_flag_i,  // 流水线暂停标志(未使用)
 
     // from csr_reg
-    input wire [`RegBus] data_i,  // CSR寄存器输入数据
+    input wire [`RegBus] data_i,  // CSR寄存器输入数据(未使用)
     input wire [`RegBus] csr_mtvec,    // mtvec寄存器 Machine Trap Vector 保存发生异常时处理器需要跳转到的地址
     input wire [`RegBus] csr_mepc,     // mepc寄存器 Machine Exception PC 它指向发生异常的指令
     input wire [`RegBus] csr_mstatus,  // mstatus寄存器
@@ -84,15 +84,20 @@ module clint (
     reg [`InstAddrBus]  inst_addr;
     reg [        31:0 ] cause;
 
-
+    // 接收到timer中断信号之后就冲刷整个流水线,ex直接暂停,暂停几个周期,等再次Idle就开始处理中断
     assign hold_flag_o = ((int_state != S_INT_IDLE) | (csr_state != S_CSR_IDLE))? `HoldEnable: `HoldDisable;
 
 
-    // int_state 中断仲裁逻辑
+    /* int_state 中断仲裁逻辑(组合逻辑)  中断产生最初的起点!!!
+    同步中断 > 异步中断 > 中断返回
+    同步中断: 如果执行阶段的指令为除法指令，则先不处理同步中断，等除法指令执行完再处理
+    异步中断: 定时器中断(外设中断)和全局中断使能(mstatus[3])打开时, 触发异步中断
+    中断返回: 当执行阶段的指令为MRET时, 触发中断返回
+    */
     always @(*) begin
         if (rst == `RstEnable) begin
             int_state = S_INT_IDLE;
-        end else begin
+        end else begin  // ECALL和EBREAK产生同步中断
             if (inst_i == `INST_ECALL || inst_i == `INST_EBREAK) begin
                 // 如果执行阶段的指令为除法指令，则先不处理同步中断，等除法指令执行完再处理
                 if (div_started_i == `DivStop) begin
@@ -120,11 +125,11 @@ module clint (
         end else begin
             case (csr_state)
                 S_CSR_IDLE: begin
-                    // 同步中断
+                    // 同步中断， 此时已经进入同步中断
                     if (int_state == S_INT_SYNC_ASSERT) begin
                         csr_state <= S_CSR_MEPC;
-                        if (jump_flag_i == `JumpEnable) begin
-                            inst_addr <= jump_addr_i - 4'h4;  // 在中断处理函数里会将中断返回地址加4
+                        if (jump_flag_i == `JumpEnable) begin   // 同步中断如果满足这个条件是什么情况? 
+                            inst_addr <= jump_addr_i - 4'h4;    // 不懂 ???
                         end else begin
                             inst_addr <= inst_addr_i;
                         end
@@ -144,16 +149,17 @@ module clint (
                         // 定时器中断
                         cause <= 32'h80000004;
                         csr_state <= S_CSR_MEPC;
-                        /*  看timer_int.c在tinyriscv上的仿真波形可以知道, 来了timer_int信号zhihou,过了5个周期才会
+                        /*  看timer_int.c在tinyriscv上的仿真波形可以知道, 来了timer_int信号之后,过了5个周期才会
                             有来自ex的jump_flag_i == `JumpEnable, 所以timer的中断满足不了jump条件, 所以inst_addr <= inst_addr_i;
+                            inst_addr_i是译码模块的输入,比pc慢一拍,所以中断结束之后跳转到之前的inst_addr_i作为pc值
                         */
-                        if (jump_flag_i == `JumpEnable) begin  // 这里不太懂
+                        if (jump_flag_i == `JumpEnable) begin  // timer中断不满足jump条件
                             inst_addr <= jump_addr_i;
                             // 异步中断可以中断除法指令的执行，中断处理完再重新执行除法指令
                         end else if (div_started_i == `DivStart) begin
                             inst_addr <= inst_addr_i - 4'h4;    // 如果正在进行除法, 就下次重新开始
                         end else begin
-                            inst_addr <= inst_addr_i;
+                            inst_addr <= inst_addr_i;   // timer中断只满足这一个
                         end
                         // 中断返回
                     end else if (int_state == S_INT_MRET) begin
@@ -179,7 +185,7 @@ module clint (
         end
     end
 
-    // 发出中断信号前，先写几个CSR寄存器
+    // 发出中断信号前，先写几个CSR寄存器 csr_reg
     always @(posedge clk) begin
         if (rst == `RstEnable) begin
             we_o <= `WriteDisable;
@@ -227,7 +233,7 @@ module clint (
             int_addr_o   <= `ZeroWord;
         end else begin
             case (csr_state)
-                // 发出中断进入信号.写完mcause寄存器才能发
+                // 发出中断进入信号.写完mcause寄存器才能发, 处理异常跳转一次, 处理结束后跳转回来
                 S_CSR_MCAUSE: begin
                     int_assert_o <= `INT_ASSERT;
                     int_addr_o   <= csr_mtvec;  // 异常处理函数地址
@@ -235,7 +241,7 @@ module clint (
                 // 发出中断返回信号
                 S_CSR_MSTATUS_MRET: begin
                     int_assert_o <= `INT_ASSERT;
-                    int_addr_o   <= csr_mepc;  // 中断返回地址
+                    int_addr_o   <= csr_mepc;   // 中断返回地址
                 end
                 default: begin
                     int_assert_o <= `INT_DEASSERT;

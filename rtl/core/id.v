@@ -34,7 +34,7 @@ module id (
     input wire [`RegBus] csr_rdata_i,  // CSR寄存器输入数据,来自csr_reg模块
 
     // from ex
-    input wire ex_jump_flag_i,  // 跳转标志,这个没用到呀
+    input wire ex_jump_flag_i,  // 跳转标志(未使用)
 
     // to regs
     output reg [`RegAddrBus] reg1_raddr_o,  // 读通用寄存器1地址, 实时得到reg1_rdata_i
@@ -44,8 +44,8 @@ module id (
     output reg [`MemAddrBus] csr_raddr_o,  // 读CSR寄存器地址, 根据inst生成的
 
     // to ex
-    output reg [`MemAddrBus] op1_o,  // 操作数1
-    output reg [`MemAddrBus] op2_o,  // 操作数2
+    output reg [`MemAddrBus] op1_o,  // 操作数1, rd1_data
+    output reg [`MemAddrBus] op2_o,  // 操作数2, rd2_data
     output reg [`MemAddrBus] op1_jump_o,
     output reg [`MemAddrBus] op2_jump_o,
     output reg [`InstBus] inst_o,  // 指令内容

@@ -38,10 +38,10 @@ module csr_reg (
 
     /* mtvec Machine Trap Vector 它保存发生异常时处理器需要跳转到的地址
        mcause Machine Cause 它指示发生异常的种类
-       mepc Machine Exception Program Counter 它指向发生异常前执行的指令
+       mepc Machine Exception Program Counter 它指向发生异常时执行的指令
        mie Machine Interrupt Enable 它指出处理器目前能处理和必须忽略的中断
        mstatus Machine Status 它保存全局中断使能，以及许多其他的状态
-       mscratch Machine Scratch 它暂时存放一个字大小的数据
+       mscratch Machine Scratch 机器模式擦写寄存器,用于保存临时数据
     */
     reg [`DoubleRegBus] cycle;
     reg [      `RegBus] mtvec;

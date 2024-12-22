@@ -78,10 +78,10 @@ module ex (
     output reg  [        2:0] div_op_o,        // 具体是哪一条除法指令
     output reg  [`RegAddrBus] div_reg_waddr_o, // 除法运算结束后要写的寄存器地址
 
-    // to ctrl 和 clint  timer中断主要是送入clint模块, div中断主要是送入ctrl模块
+    // to ctrl 和 clint  timer中断主要是送入clint模块, div导致的暂停主要是送入ctrl模块
     output wire                hold_flag_o,  // 是否暂停标志
-    output wire                jump_flag_o,  // 是否跳转标志
-    output wire [`InstAddrBus] jump_addr_o   // 跳转目的地址
+    output wire                jump_flag_o,  // 是否跳转标志  to clint, ctrl,  id(未使用)
+    output wire [`InstAddrBus] jump_addr_o   // 跳转目的地址  to clint, ctrl
 
 );
 
@@ -117,7 +117,7 @@ module ex (
     reg                   div_jump_flag;
     reg  [ `InstAddrBus]  div_jump_addr;
     reg                   hold_flag;
-    reg                   jump_flag;
+    reg                   jump_flag;        // 是一般指令中的跳转标志
     reg  [ `InstAddrBus]  jump_addr;
     reg                   mem_we;
     reg                   mem_req;

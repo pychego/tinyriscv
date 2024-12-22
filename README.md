@@ -196,6 +196,8 @@ C语言程序例程位于tests\example目录里。
 
 ` python .\sim_new_nowave.py ..\tests\example\simple\simple.bin inst.data`
 
+` python .\sim_new_nowave.py ..\tests\example\simple\timer_int.bin inst.data`
+
 # 5.移植到FPGA
 
 详细的移植方法请查看本项目下的fpga目录中的README.md文件。
