@@ -34,9 +34,9 @@ module gpio (
 );
 
 
-    // GPIO控制寄存器
+    // GPIO控制寄存器地址
     localparam GPIO_CTRL = 4'h0;
-    // GPIO数据寄存器
+    // GPIO数据寄存器地址
     localparam GPIO_DATA = 4'h4;
 
     // 每2位控制1个IO的模式，最多支持16个IO
@@ -44,7 +44,7 @@ module gpio (
     等到真正综合的时候再仔细看看这个模块的功能吧
     */
     // 0: 高阻，1：输出，2：输入    
-    reg [31:0] gpio_ctrl;   // gpio中的两个寄存器
+    reg [31:0] gpio_ctrl;  // gpio中的两个寄存器
     // 输入输出数据
     reg [31:0] gpio_data;
 

@@ -234,7 +234,7 @@ module tinyriscv_soc_top (
         .data_i  (s4_data_o),
         .data_o  (s4_data_i),
         .io_pin_i(io_in),
-        .reg_ctrl(gpio_ctrl),
+        .reg_ctrl(gpio_ctrl),       // output
         .reg_data(gpio_data)
     );
 
