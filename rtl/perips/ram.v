@@ -17,6 +17,8 @@
 `include "../core/defines.v"
 
 // ram module  这个项目中的ram和rom模块内容完全一样
+/* 三级流水线, ex访问总线的优先级要比pc_reg的优先级高, pc_reg每个clk周期都要访问总线
+*/
 module ram (
 
     input wire clk,

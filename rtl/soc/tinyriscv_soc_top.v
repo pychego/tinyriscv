@@ -151,6 +151,8 @@ module tinyriscv_soc_top (
     end
 
     // tinyriscv处理器核模块例化
+    /* 问题: 当ex模块要回写到ram中,这个clk要占用总线, 那pc_reg在这个clk还怎么取inst呢
+    */
     tinyriscv u_tinyriscv (
         .clk          (clk),
         .rst          (rst),
@@ -268,7 +270,7 @@ module tinyriscv_soc_top (
         .m1_addr_i(m1_addr_i),
         .m1_data_i(`ZeroWord),
         .m1_data_o(m1_data_o),
-        .m1_req_i (`RIB_REQ),
+        .m1_req_i (`RIB_REQ),   // pc_reg 一直访问总线
         .m1_we_i  (`WriteDisable),
 
         // master 2 interface

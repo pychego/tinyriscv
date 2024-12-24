@@ -26,17 +26,17 @@ module rib (
     input wire clk,
     input wire rst,
 
-    // master 0 interface
+    // master 0 ex
     input  wire [`MemAddrBus] m0_addr_i,  // 主设备0读、写地址 32bit
     input  wire [    `MemBus] m0_data_i,  // 主设备0写数据     32bit
     output reg  [    `MemBus] m0_data_o,  // 主设备0读取到的数据
     input  wire               m0_req_i,   // 主设备0访问请求标志
     input  wire               m0_we_i,    // 主设备0写标志
 
-    // master 1 interface
+    // master 1  pc_reg
     input  wire [`MemAddrBus] m1_addr_i,  // 主设备1读、写地址
     input  wire [    `MemBus] m1_data_i,  // 主设备1写数据
-    output reg  [    `MemBus] m1_data_o,  // 主设备1读取到的数据
+    output reg  [    `MemBus] m1_data_o,  // 读取的inst指令,当pc_reg不占有总线时, 读取的是INST_NOP空操作
     input  wire               m1_req_i,   // 主设备1访问请求标志
     input  wire               m1_we_i,    // 主设备1写标志
 
@@ -90,7 +90,8 @@ module rib (
     input  wire [    `MemBus] s5_data_i,  // 从设备5读取到的数据
     output reg                s5_we_o,    // 从设备5写标志
 
-    output reg hold_flag_o  // 暂停流水线标志
+    // 一直以来忽略了这个信号
+    output reg hold_flag_o  // 暂停流水线标志!!! 
 
 );
 
@@ -122,14 +123,14 @@ module rib (
     // 仲裁逻辑
     // 固定优先级仲裁机制
     // 优先级由高到低：主设备3，主设备0，主设备2，主设备1
-    /* 顺序一次为uart串口模块, ex模块, jtag_top模块, pc_reg模块
+    /* 顺序依次为uart串口模块, ex模块, jtag_top模块, pc_reg模块
        其中除了pc_reg外其他主设备访问总线都需要流水线停顿
     */
     always @(*) begin
         if (req[3]) begin
             grant = grant3;
             hold_flag_o = `HoldEnable;
-        end else if (req[0]) begin
+        end else if (req[0]) begin      // Master0 ex
             grant = grant0;
             hold_flag_o = `HoldEnable;
         end else if (req[2]) begin

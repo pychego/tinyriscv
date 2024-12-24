@@ -54,6 +54,14 @@ module ex (
 
     // to mem
     /* 当与RIB总线连接时, 会根据we信号选择addr是mem_raddr_o
+       详解 ex访存和回写的过程,一般5级流水线访存和回写各占用一级, 但这里3级流水线情况不同
+        rib优先级: ex(master0) > pc_reg(master1)
+        根据sw指令的仿真波形波得到以下结果: 
+        ex访存只需要读,这个由于读总线是组合逻辑, 不需要占用时钟, 重要的是回写, 是在时钟边沿回写
+        有回写的inst到达ex之后, mem_req_o变1,此时ex占用总线,rib发出hold_flag_o流水线暂停标志(只暂停取指),并且此刻由于pc_reg不占有总线
+        if_id取值得到的是INST_NOP, 为流水线插入了一个nop,这样后面译码和执行对于每个inst都只执行一次, pc停止了一个clk,后面就恢复正常
+
+
     */
     output reg  [    `MemBus] mem_wdata_o,  // 写内存数据
     output reg  [`MemAddrBus] mem_raddr_o,  // 读内存地址
