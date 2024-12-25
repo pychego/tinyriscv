@@ -156,7 +156,7 @@ make install
 
 打开CMD窗口，进入到sim目录，执行以下命令：
 
-```python .\sim_new_nowave.py ..\tests\isa\generated\rv32ui-p-add.bin inst.data```
+```python .\sim_new_nowave.py ..\tests\isa\generated\rv32um-p-divu.bin inst.data```
 
 如果运行成功的话就可以看到&quot;PASS&quot;的打印。其他指令使用方法类似。
 

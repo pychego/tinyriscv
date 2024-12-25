@@ -13,7 +13,7 @@ module pc_reg (
     */
     input wire                  jump_flag_i,       // 跳转标志
     input wire [  `InstAddrBus] jump_addr_i,       // 跳转地址
-    input wire [`Hold_Flag_Bus] hold_flag_i,       // 流水线暂停标志, 来源于rib模块
+    input wire [`Hold_Flag_Bus] hold_flag_i,       // 流水线暂停标志
     // 来自jtag模块
     input wire                  jtag_reset_flag_i, // 复位标志
 

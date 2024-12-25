@@ -273,8 +273,8 @@ module ex (
                 /* ox10为div指令的地址pc_o
                 除法开始...
                    clk0到来, pc_o为0x10, 译码id为0x0C, ex执行0x08
-                   clk1到来, pc_o为0x14, 译码id为0x10,译出div指令, ex执行0x0C
-                   clk2到来, pc_o为0x18, 译码id为0x14, ex执行0x10,输出流水线暂停指令给ctrl, 并输出跳转使能和跳转地址
+                   clk1到来, pc_o为0x14, 译码id为0x10,译出div指令(此时id输出的跳转地址是inst_addr_i + 4 = 0x14), ex执行0x0C
+                   clk2到来, pc_o为0x18, 译码id为0x14, ex执行0x10,输出流水线暂停指令给ctrl, 并输出jump_flag和jump_addr
                    clk3的到来,pc_o根据跳转地址跳转到0x10 + 0x04 = 0x14, 译码停止, ex停止
                 除法结束...
                    clk0到来,除法结束,这个周期pc_o还是0x14,但是译码id空档,ex执行空档
