@@ -1,0 +1,35 @@
+[*]
+[*] GTKWave Analyzer v3.3.100 (w)1999-2019 BSI
+[*] Fri Dec 27 07:20:01 2024
+[*]
+[dumpfile] "D:\tinyriscv\sim\tinyriscv_soc_tb.vcd"
+[dumpfile_mtime] "Fri Dec 27 07:03:28 2024"
+[dumpfile_size] 599944
+[savefile] "D:\tinyriscv\sim\aa.gtkw"
+[timestart] 0
+[size] 1920 1009
+[pos] -87 -87
+*-15.811000 298300 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1
+[treeopen] tinyriscv_soc_tb.
+[treeopen] tinyriscv_soc_tb.tinyriscv_soc_top_0.
+[treeopen] tinyriscv_soc_tb.tinyriscv_soc_top_0.u_tinyriscv.
+[sst_width] 330
+[signals_width] 166
+[sst_expanded] 1
+[sst_vpaned_height] 297
+@28
+tinyriscv_soc_tb.tinyriscv_soc_top_0.u_tinyriscv.u_pc_reg.clk
+@22
+tinyriscv_soc_tb.tinyriscv_soc_top_0.u_tinyriscv.u_pc_reg.pc_o[31:0]
+tinyriscv_soc_tb.tinyriscv_soc_top_0.u_tinyriscv.u_if_id.inst_addr_i[31:0]
+tinyriscv_soc_tb.tinyriscv_soc_top_0.u_tinyriscv.u_if_id.inst_i[31:0]
+tinyriscv_soc_tb.tinyriscv_soc_top_0.u_tinyriscv.u_id.inst_i[31:0]
+tinyriscv_soc_tb.tinyriscv_soc_top_0.u_tinyriscv.u_ex.inst_i[31:0]
+@28
+tinyriscv_soc_tb.tinyriscv_soc_top_0.u_tinyriscv.u_ex.jump_flag
+@22
+tinyriscv_soc_tb.tinyriscv_soc_top_0.u_tinyriscv.u_ex.jump_addr[31:0]
+@29
+tinyriscv_soc_tb.tinyriscv_soc_top_0.u_tinyriscv.u_ctrl.hold_flag_o[2:0]
+[pattern_trace] 1
+[pattern_trace] 0

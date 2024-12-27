@@ -244,6 +244,7 @@ module id (
                 op1_o = {inst_i[31:12], 12'b0};
                 op2_o = `ZeroWord;
             end
+            // auipc 这个pc指的是auioc这条指令对应的pc
             `INST_AUIPC: begin  // PC加立即数 Add Upper Immediate to PC
                 reg_we_o = `WriteEnable;
                 reg_waddr_o = rd;

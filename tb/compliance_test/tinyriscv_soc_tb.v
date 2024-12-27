@@ -6,7 +6,8 @@
 `define TEST_PROG  1
 //`define TEST_JTAG  1
 
-
+/*  测试新的指令集使用这个tb
+*/
 // testbench module
 module tinyriscv_soc_tb;
 
@@ -15,7 +16,11 @@ module tinyriscv_soc_tb;
 
 
     always #10 clk = ~clk;     // 50MHz
-
+    /* tinyriscv内部的32个通用寄存器
+       x3: gp
+       x26: s10
+       x27: s11
+    */
     wire[`RegBus] x3 = tinyriscv_soc_top_0.u_tinyriscv.u_regs.regs[3];
     wire[`RegBus] x26 = tinyriscv_soc_top_0.u_tinyriscv.u_regs.regs[26];
     wire[`RegBus] x27 = tinyriscv_soc_top_0.u_tinyriscv.u_regs.regs[27];

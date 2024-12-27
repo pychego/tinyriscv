@@ -84,7 +84,7 @@ module clint (
     reg [`InstAddrBus]  inst_addr;
     reg [        31:0 ] cause;
 
-    // 接收到timer中断信号之后就冲刷整个流水线,ex直接暂停,暂停几个周期,等再次Idle就开始处理中断
+    // 接收到timer中断信号/同步中断之后就冲刷整个流水线,ex直接暂停,暂停几个周期,等再次Idle就开始处理中断
     assign hold_flag_o = ((int_state != S_INT_IDLE) | (csr_state != S_CSR_IDLE))? `HoldEnable: `HoldDisable;
 
 

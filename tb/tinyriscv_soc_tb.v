@@ -6,6 +6,8 @@
 `define TEST_PROG  1
 //`define TEST_JTAG  1
 
+/*  测试老的指令集使用这个tb
+*/
 
 // testbench module
 module tinyriscv_soc_tb;

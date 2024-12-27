@@ -170,7 +170,7 @@ module tinyriscv_soc_top (
         .jtag_reg_we_i  (jtag_reg_we_o),
         .jtag_reg_data_o(jtag_reg_data_i),
 
-        .rib_hold_flag_i  (rib_hold_flag_o),
+        .rib_hold_flag_i  (rib_hold_flag_o),    // ex申请总线, pc暂停, pc读取nop指令
         .jtag_halt_flag_i (jtag_halt_req_o),
         .jtag_reset_flag_i(jtag_reset_req_o),
 

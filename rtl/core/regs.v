@@ -58,7 +58,7 @@ module regs (
     // 写通用寄存器, x0寄存器硬连线为0
     always @(posedge clk) begin
         if (rst == `RstDisable) begin
-            // 优先ex模块写操作
+            // 写入regs的优先级: ex > jtag
             if ((we_i == `WriteEnable) && (waddr_i != `ZeroReg)) begin
                 regs[waddr_i] <= wdata_i;
             end else if ((jtag_we_i == `WriteEnable) && (jtag_addr_i != `ZeroReg)) begin
