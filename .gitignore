@@ -3,6 +3,6 @@
 *.ko
 *.obj
 *.docx
-*.vsdx
+# *.vsdx
 *.~vsdx
 *.png
