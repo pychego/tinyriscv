@@ -9,7 +9,7 @@ module pc_reg (
     input wire rst,
 
     // 下面三个输入来自ctrl模块
-    /* 优先级: jump > hold_flag > pc_o + 4
+    /* 优先级: jump Instruction > hold_flag > pc_o + 4
     */
     input wire                  jump_flag_i,       // 跳转标志
     input wire [  `InstAddrBus] jump_addr_i,       // 跳转地址
@@ -25,17 +25,17 @@ module pc_reg (
 
 
     always @(posedge clk) begin
-        // 复位
         if (rst == `RstEnable || jtag_reset_flag_i == 1'b1) begin
+            // 复位
             pc_o <= `CpuResetAddr;
-            // 跳转
         end else if (jump_flag_i == `JumpEnable) begin
+            // 跳转
             pc_o <= jump_addr_i;
-            // 暂停
         end else if (hold_flag_i >= `Hold_Pc) begin
+            // 暂停
             pc_o <= pc_o;
-            // 地址加4
         end else begin
+            // 地址加4
             pc_o <= pc_o + 4'h4;
         end
     end
