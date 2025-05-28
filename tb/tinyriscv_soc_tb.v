@@ -403,7 +403,7 @@ module tinyriscv_soc_tb;
 
     // sim timeout
     initial begin
-      #500000 $display("Time Out.");
+        #500000 $display("Time Out.");
         $finish;
     end
 
