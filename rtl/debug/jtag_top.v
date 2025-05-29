@@ -37,7 +37,7 @@ module jtag_top #(
     output wire [31:0] reg_wdata_o,
     input  wire [31:0] reg_rdata_i,
 
-    // 通过AHB总线与内存交互
+    // 通过总线与内存交互
     output wire        mem_we_o,
     output wire [31:0] mem_addr_o,
     output wire [31:0] mem_wdata_o,
