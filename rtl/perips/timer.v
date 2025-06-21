@@ -70,7 +70,7 @@ module timer (
         end else begin
             if (we_i == `WriteEnable) begin
                 case (addr_i[3:0])
-                    REG_CTRL: begin
+                    REG_CTRL: begin  // timer_ctrl[2] <= (timer_ctrl[2] & (~data_i[2])), write 1 to clear
                         timer_ctrl <= {data_i[31:3], (timer_ctrl[2] & (~data_i[2])), data_i[1:0]};
                     end
                     REG_VALUE: begin

@@ -54,6 +54,10 @@ module gpio (
 
 
     // 写寄存器
+    /*
+        gpio_ctrl 2(input) will use io_pin_i as input
+        gpio_ctrl 1(output) will not use io_pin_i
+    */
     always @(posedge clk) begin
         if (rst == 1'b0) begin
             gpio_data <= 32'h0;
@@ -68,7 +72,7 @@ module gpio (
                         gpio_data <= data_i;
                     end
                 endcase
-            end else begin
+            end else begin  // 只有在gpio是输入模式才用到下面的语句
                 if (gpio_ctrl[1:0] == 2'b10) begin
                     gpio_data[0] <= io_pin_i[0];
                 end
